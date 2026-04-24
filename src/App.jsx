@@ -26,6 +26,8 @@ export default function App() {
   // Config
   const [urlPulso,  setUrlPulso]  = useState(saved.urlPulso  || '')
   const [urlAvance, setUrlAvance] = useState(saved.urlAvance || '')
+  const [tabPulso,  setTabPulso]  = useState(saved.tabPulso  || '')
+  const [tabAvance, setTabAvance] = useState(saved.tabAvance || '')
   const [companyName, setCompanyName] = useState(saved.companyName || '')
   const [logoUrl, setLogoUrl] = useState(saved.logoUrl || '')
 
@@ -42,8 +44,8 @@ export default function App() {
 
   // Persistir config
   useEffect(() => {
-    saveConfig({ urlPulso, urlAvance, companyName, logoUrl })
-  }, [urlPulso, urlAvance, companyName, logoUrl])
+    saveConfig({ urlPulso, urlAvance, tabPulso, tabAvance, companyName, logoUrl })
+  }, [urlPulso, urlAvance, tabPulso, tabAvance, companyName, logoUrl])
 
   // Conectar a los sheets
   const handleConnect = useCallback(async () => {
@@ -59,7 +61,7 @@ export default function App() {
     const results = { pulso: null, avance: null, errors: [] }
 
     if (urlPulso) {
-      const csvUrl = toCsvUrl(urlPulso)
+      const csvUrl = toCsvUrl(urlPulso, tabPulso)
       if (!csvUrl) {
         results.errors.push('Pulso: URL no reconocida.')
       } else {
@@ -73,7 +75,7 @@ export default function App() {
     }
 
     if (urlAvance) {
-      const csvUrl = toCsvUrl(urlAvance)
+      const csvUrl = toCsvUrl(urlAvance, tabAvance)
       if (!csvUrl) {
         results.errors.push('Avance: URL no reconocida.')
       } else {
@@ -131,10 +133,14 @@ export default function App() {
       <ConfigPanel
         urlPulso={urlPulso}
         urlAvance={urlAvance}
+        tabPulso={tabPulso}
+        tabAvance={tabAvance}
         companyName={companyName}
         logoUrl={logoUrl}
         onChangeUrlPulso={setUrlPulso}
         onChangeUrlAvance={setUrlAvance}
+        onChangeTabPulso={setTabPulso}
+        onChangeTabAvance={setTabAvance}
         onChangeCompany={setCompanyName}
         onChangeLogo={setLogoUrl}
         onConnect={handleConnect}

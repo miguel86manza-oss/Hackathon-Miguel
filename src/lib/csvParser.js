@@ -3,37 +3,37 @@ import { PULSO_QUESTIONS, AVANCE_OBJETIVOS, META_COLS } from './schema.js'
 
 /**
  * Convierte una URL de Google Sheets a su URL de descarga CSV.
- * Acepta cualquiera de:
- *  - https://docs.google.com/spreadsheets/d/<ID>/edit?gid=<GID>#gid=<GID>  (URL de edición normal)
- *  - https://docs.google.com/spreadsheets/d/<ID>/pub?output=csv             (URL publicada)
- *  - https://docs.google.com/spreadsheets/d/e/<LONG_ID>/pub?output=csv      (URL publicada larga)
+ * Si se pasa sheetName, usa el endpoint gviz/tq que permite especificar la pestaña por nombre.
  * Requiere que la hoja esté compartida con "Cualquier persona con el enlace puede ver".
- * Devuelve null si no puede parsear.
+ * Devuelve null si no puede parsear el ID del spreadsheet.
  */
-export function toCsvUrl(rawUrl) {
+export function toCsvUrl(rawUrl, sheetName = null) {
   if (!rawUrl || typeof rawUrl !== 'string') return null
   const url = rawUrl.trim()
 
-  // Ya está publicada como CSV — la dejamos tal cual
+  // Extraer el ID del spreadsheet (funciona con URLs de edición, pub y export)
+  const idMatch = url.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/)
+  if (!idMatch) return null
+  const id = idMatch[1]
+
+  // Si se especifica nombre de pestaña, usar gviz/tq (acepta nombre directo sin necesitar GID)
+  if (sheetName && sheetName.trim()) {
+    return `https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName.trim())}`
+  }
+
+  // Sin nombre de pestaña: URL ya publicada como CSV — la dejamos tal cual
   if (/\/pub(\?|$)/.test(url) && /output=csv/.test(url)) return url
 
   // Ya está publicada (formato /pub) pero sin output=csv
-  const pubMatch = url.match(/\/spreadsheets\/d\/e\/([a-zA-Z0-9-_]+)\/pub/)
-  if (pubMatch) {
+  if (/\/spreadsheets\/d\/e\//.test(url)) {
     const sep = url.includes('?') ? '&' : '?'
     return `${url}${sep}output=csv`
   }
 
-  // URL de edit clásica — extraemos ID y GID
-  const idMatch = url.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/)
-  if (idMatch) {
-    const id = idMatch[1]
-    const gidMatch = url.match(/[?&#]gid=([0-9]+)/)
-    const gid = gidMatch ? gidMatch[1] : '0'
-    return `https://docs.google.com/spreadsheets/d/${id}/export?format=csv&gid=${gid}`
-  }
-
-  return null
+  // URL de edición clásica — export por GID (lee la pestaña del gid indicado)
+  const gidMatch = url.match(/[?&#]gid=([0-9]+)/)
+  const gid = gidMatch ? gidMatch[1] : '0'
+  return `https://docs.google.com/spreadsheets/d/${id}/export?format=csv&gid=${gid}`
 }
 
 /**

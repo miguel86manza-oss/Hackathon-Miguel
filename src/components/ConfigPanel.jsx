@@ -2,8 +2,9 @@ import React, { useRef, useState } from 'react'
 import { toCsvUrl } from '../lib/csvParser.js'
 
 export default function ConfigPanel({
-  urlPulso, urlAvance, companyName, logoUrl,
-  onChangeUrlPulso, onChangeUrlAvance, onChangeCompany, onChangeLogo,
+  urlPulso, urlAvance, tabPulso, tabAvance, companyName, logoUrl,
+  onChangeUrlPulso, onChangeUrlAvance, onChangeTabPulso, onChangeTabAvance,
+  onChangeCompany, onChangeLogo,
   onConnect, onReset,
   loading, status, statusType,
 }) {
@@ -58,8 +59,16 @@ export default function ConfigPanel({
                 value={urlPulso}
                 onChange={(e) => onChangeUrlPulso(e.target.value)}
               />
+              <input
+                type="text"
+                className="field__input"
+                style={{ marginTop: 6 }}
+                placeholder="Nombre exacto de la pestaña (ej: Pulso coalición Cosude 24-04-26_RawData)"
+                value={tabPulso}
+                onChange={(e) => onChangeTabPulso(e.target.value)}
+              />
               <span className="field__hint">
-                Recopilador de Pulso (10 afirmaciones, escala 1–5). Pegá la URL de edición normal.
+                Recopilador de Pulso (10 afirmaciones, escala 1–5). El nombre de pestaña debe coincidir exactamente con el de la hoja.
               </span>
             </div>
 
@@ -74,8 +83,16 @@ export default function ConfigPanel({
                 value={urlAvance}
                 onChange={(e) => onChangeUrlAvance(e.target.value)}
               />
+              <input
+                type="text"
+                className="field__input"
+                style={{ marginTop: 6 }}
+                placeholder="Nombre exacto de la pestaña (ej: Pulso registro de avance de objetivos Cosude 24-04-26_RawData)"
+                value={tabAvance}
+                onChange={(e) => onChangeTabAvance(e.target.value)}
+              />
               <span className="field__hint">
-                Recopilador de Avance (3 objetivos, escala 1–3). Pegá la URL de edición normal.
+                Recopilador de Avance (3 objetivos, escala 1–3). El nombre de pestaña debe coincidir exactamente con el de la hoja.
               </span>
             </div>
 
@@ -139,10 +156,10 @@ export default function ConfigPanel({
           {(urlPulso || urlAvance) && (
             <div style={{ marginTop: 12, fontSize: 11, color: 'var(--text-mute)' }}>
               {urlPulso && (
-                <div>URL Pulso que se usará: <code style={{ fontSize: 10 }}>{toCsvUrl(urlPulso) || '— URL no reconocida, pegá la URL completa de Google Sheets —'}</code></div>
+                <div>URL Pulso que se usará: <code style={{ fontSize: 10 }}>{toCsvUrl(urlPulso, tabPulso) || '— URL no reconocida, pegá la URL completa de Google Sheets —'}</code></div>
               )}
               {urlAvance && (
-                <div>URL Avance que se usará: <code style={{ fontSize: 10 }}>{toCsvUrl(urlAvance) || '— URL no reconocida, pegá la URL completa de Google Sheets —'}</code></div>
+                <div>URL Avance que se usará: <code style={{ fontSize: 10 }}>{toCsvUrl(urlAvance, tabAvance) || '— URL no reconocida, pegá la URL completa de Google Sheets —'}</code></div>
               )}
             </div>
           )}
