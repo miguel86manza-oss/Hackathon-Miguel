@@ -43,7 +43,7 @@ export default function ConfigPanel({
       {!collapsed && (
         <>
           <div className="banner">
-            <strong>Cómo publicar tu Google Sheet:</strong> desde la hoja → <code>Archivo</code> → <code>Compartir</code> → <code>Publicar en la web</code> → elegir la pestaña correcta → formato <code>CSV</code> → <code>Publicar</code>. Copiá la URL resultante y pegala abajo. También podés pegar la URL normal de edición; el dashboard la intenta convertir (si no, publicala como CSV).
+            <strong>Cómo conectar tu Google Sheet:</strong> abrí la hoja → <code>Compartir</code> → <code>Cualquier persona con el enlace</code> → rol <code>Lector</code>. Luego copiá la URL de la barra del navegador y pegala abajo. No hace falta publicar como CSV.
           </div>
 
           <div className="config__grid">
@@ -54,12 +54,12 @@ export default function ConfigPanel({
               <input
                 type="url"
                 className="field__input"
-                placeholder="https://docs.google.com/spreadsheets/d/.../pub?output=csv"
+                placeholder="https://docs.google.com/spreadsheets/d/.../edit?gid=0#gid=0"
                 value={urlPulso}
                 onChange={(e) => onChangeUrlPulso(e.target.value)}
               />
               <span className="field__hint">
-                Recopilador de Pulso (10 afirmaciones, escala 1–5).
+                Recopilador de Pulso (10 afirmaciones, escala 1–5). Pegá la URL de edición normal.
               </span>
             </div>
 
@@ -70,12 +70,12 @@ export default function ConfigPanel({
               <input
                 type="url"
                 className="field__input"
-                placeholder="https://docs.google.com/spreadsheets/d/.../pub?output=csv"
+                placeholder="https://docs.google.com/spreadsheets/d/.../edit?gid=0#gid=0"
                 value={urlAvance}
                 onChange={(e) => onChangeUrlAvance(e.target.value)}
               />
               <span className="field__hint">
-                Recopilador de Avance (3 objetivos, escala 1–3).
+                Recopilador de Avance (3 objetivos, escala 1–3). Pegá la URL de edición normal.
               </span>
             </div>
 
@@ -139,10 +139,10 @@ export default function ConfigPanel({
           {(urlPulso || urlAvance) && (
             <div style={{ marginTop: 12, fontSize: 11, color: 'var(--text-mute)' }}>
               {urlPulso && (
-                <div>URL Pulso convertida: <code style={{ fontSize: 10 }}>{toCsvUrl(urlPulso) || '— no pude convertirla, publicala como CSV —'}</code></div>
+                <div>URL Pulso que se usará: <code style={{ fontSize: 10 }}>{toCsvUrl(urlPulso) || '— URL no reconocida, pegá la URL completa de Google Sheets —'}</code></div>
               )}
               {urlAvance && (
-                <div>URL Avance convertida: <code style={{ fontSize: 10 }}>{toCsvUrl(urlAvance) || '— no pude convertirla, publicala como CSV —'}</code></div>
+                <div>URL Avance que se usará: <code style={{ fontSize: 10 }}>{toCsvUrl(urlAvance) || '— URL no reconocida, pegá la URL completa de Google Sheets —'}</code></div>
               )}
             </div>
           )}

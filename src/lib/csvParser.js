@@ -2,11 +2,12 @@ import Papa from 'papaparse'
 import { PULSO_QUESTIONS, AVANCE_OBJETIVOS, META_COLS } from './schema.js'
 
 /**
- * Convierte una URL normal de Google Sheets a la URL pública publicada en CSV.
+ * Convierte una URL de Google Sheets a su URL de descarga CSV.
  * Acepta cualquiera de:
- *  - https://docs.google.com/spreadsheets/d/<ID>/edit#gid=<GID>
- *  - https://docs.google.com/spreadsheets/d/<ID>/pub?output=csv
- *  - https://docs.google.com/spreadsheets/d/e/<LONG_ID>/pub?output=csv  (URL ya publicada)
+ *  - https://docs.google.com/spreadsheets/d/<ID>/edit?gid=<GID>#gid=<GID>  (URL de edición normal)
+ *  - https://docs.google.com/spreadsheets/d/<ID>/pub?output=csv             (URL publicada)
+ *  - https://docs.google.com/spreadsheets/d/e/<LONG_ID>/pub?output=csv      (URL publicada larga)
+ * Requiere que la hoja esté compartida con "Cualquier persona con el enlace puede ver".
  * Devuelve null si no puede parsear.
  */
 export function toCsvUrl(rawUrl) {
@@ -29,8 +30,6 @@ export function toCsvUrl(rawUrl) {
     const id = idMatch[1]
     const gidMatch = url.match(/[?&#]gid=([0-9]+)/)
     const gid = gidMatch ? gidMatch[1] : '0'
-    // Formato export — sirve si la hoja es accesible públicamente,
-    // PERO muchas veces CORS bloquea esto. La vía recomendada es pub?output=csv.
     return `https://docs.google.com/spreadsheets/d/${id}/export?format=csv&gid=${gid}`
   }
 
@@ -44,7 +43,7 @@ export function toCsvUrl(rawUrl) {
 export async function fetchAndParseCsv(csvUrl, schemaType = 'pulso') {
   const resp = await fetch(csvUrl)
   if (!resp.ok) {
-    throw new Error(`No se pudo acceder al Sheet (HTTP ${resp.status}). Verificá que esté publicado como CSV.`)
+    throw new Error(`No se pudo acceder al Sheet (HTTP ${resp.status}). Verificá que esté compartido con "Cualquier persona con el enlace puede ver".`)
   }
   const text = await resp.text()
 
@@ -53,7 +52,7 @@ export async function fetchAndParseCsv(csvUrl, schemaType = 'pulso') {
   })
 
   if (parsed.errors.length > 0 && parsed.errors[0].type === 'Delimiter') {
-    throw new Error('El archivo no parece un CSV válido. ¿Publicaste la hoja como CSV?')
+    throw new Error('No se pudo leer la hoja. Verificá que la URL sea de Google Sheets y que esté compartida con acceso público de lectura.')
   }
 
   const matrix = parsed.data
