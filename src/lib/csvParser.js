@@ -61,7 +61,7 @@ export async function fetchAndParseCsv(csvUrl, schemaType = 'pulso') {
   // En los recopiladores Cosude, las preguntas están en la ÚLTIMA fila que contiene
   // la primera pregunta. Buscamos qué fila contiene la primera pregunta del esquema.
   const questions = schemaType === 'pulso' ? PULSO_QUESTIONS : AVANCE_OBJETIVOS
-  const firstQuestionText = normalize(questions[0].full)
+  const firstQuestionTarget = normalize(questions[0].full).replace(/[.!?,;]+$/, '').trim().slice(0, 40)
 
   let headerRowIdx = -1
   const colMap = {}  // questionId -> columnIndex
@@ -69,7 +69,8 @@ export async function fetchAndParseCsv(csvUrl, schemaType = 'pulso') {
   for (let r = 0; r < Math.min(matrix.length, 10); r++) {
     const row = matrix[r]
     for (let c = 0; c < row.length; c++) {
-      if (normalize(row[c]).includes(firstQuestionText.slice(0, 40))) {
+      const cellNorm = normalize(row[c]).replace(/[.!?,;]+$/, '').trim()
+      if (cellNorm.includes(firstQuestionTarget) || firstQuestionTarget.includes(cellNorm.slice(0, 25))) {
         headerRowIdx = r
         break
       }
@@ -87,9 +88,11 @@ export async function fetchAndParseCsv(csvUrl, schemaType = 'pulso') {
   // Mapear cada pregunta a su columna, buscando match por texto normalizado
   const headerRow = matrix[headerRowIdx]
   for (const q of questions) {
-    const target = normalize(q.full).slice(0, 40)
+    // Strip trailing punctuation before comparing — some sheets omit the final period
+    const target = normalize(q.full).replace(/[.!?,;]+$/, '').trim().slice(0, 40)
     for (let c = 0; c < headerRow.length; c++) {
-      if (normalize(headerRow[c]).includes(target)) {
+      const cellNorm = normalize(headerRow[c]).replace(/[.!?,;]+$/, '').trim()
+      if (cellNorm.includes(target) || target.includes(cellNorm.slice(0, 25))) {
         colMap[q.id] = c
         break
       }
@@ -101,14 +104,32 @@ export async function fetchAndParseCsv(csvUrl, schemaType = 'pulso') {
     console.warn(`Solo se mapearon ${foundCount} de ${questions.length} preguntas`)
   }
 
+  // --- Detectar columna de timestamp dinámicamente ---
+  // Buscamos en todas las filas hasta (e incluyendo) el header alguna celda con texto
+  // de fecha/hora. Si no se encuentra, quedamos sin timestamp (filas agrupadas en una sola sesión).
+  const tsKeywords = ['timestamp', 'marca de tiempo', 'fecha', 'time', 'hora', 'date']
+  let timestampColIdx = null
+  outer: for (let r = 0; r <= headerRowIdx; r++) {
+    for (let c = 0; c < matrix[r].length; c++) {
+      const cellNorm = normalize(matrix[r][c])
+      if (tsKeywords.some(kw => cellNorm.includes(kw))) {
+        timestampColIdx = c
+        break outer
+      }
+    }
+  }
+  // Fallback al índice fijo original si el header no lo reveló
+  if (timestampColIdx === null) timestampColIdx = META_COLS.timestamp
+
   // --- Extraer filas de respuestas ---
-  // Las respuestas empiezan DESPUÉS de la fila de headers
-  // y contienen un timestamp en la columna 3
   const rows = []
   for (let r = headerRowIdx + 1; r < matrix.length; r++) {
     const row = matrix[r]
-    const ts = row[META_COLS.timestamp]
-    if (!ts || !ts.trim()) continue  // fila vacía
+
+    // Saltar filas completamente vacías
+    if (row.every(cell => !cell || !String(cell).trim())) continue
+
+    const ts = row[timestampColIdx]
 
     const responses = {}
     let hasAnyResponse = false
@@ -126,7 +147,7 @@ export async function fetchAndParseCsv(csvUrl, schemaType = 'pulso') {
     if (hasAnyResponse) {
       rows.push({
         timestamp: parseTimestamp(ts),
-        rawTimestamp: ts,
+        rawTimestamp: ts || '',
         responseId: row[META_COLS.responseId] || '',
         responses,
       })
@@ -189,24 +210,30 @@ function parseTimestamp(ts) {
 export function groupBySessions(rows) {
   const groups = new Map()
   for (const row of rows) {
-    if (!row.timestamp) continue
-    const key = dateKey(row.timestamp)
+    // Si no hay timestamp, todas las filas sin fecha van a un grupo único
+    const key = row.timestamp ? dateKey(row.timestamp) : '__sin_fecha__'
     if (!groups.has(key)) {
       groups.set(key, {
         sessionKey: key,
-        date: row.timestamp,
+        date: row.timestamp || null,
         rows: [],
       })
     }
     groups.get(key).rows.push(row)
   }
 
-  // Ordenar cronológicamente y asignar label Sesión 1, 2, ...
-  const sorted = Array.from(groups.values()).sort((a, b) => a.date - b.date)
+  // Ordenar cronológicamente; el grupo sin fecha va al final
+  const sorted = Array.from(groups.values()).sort((a, b) => {
+    if (!a.date && !b.date) return 0
+    if (!a.date) return 1
+    if (!b.date) return -1
+    return a.date - b.date
+  })
+
   return sorted.map((g, i) => ({
     ...g,
     label: `Sesión ${i + 1}`,
-    shortDate: formatShortDate(g.date),
+    shortDate: g.date ? formatShortDate(g.date) : 'Actual',
   }))
 }
 
