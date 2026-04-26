@@ -2,38 +2,39 @@ import Papa from 'papaparse'
 import { PULSO_QUESTIONS, AVANCE_OBJETIVOS, META_COLS } from './schema.js'
 
 /**
- * Convierte una URL de Google Sheets a su URL de descarga CSV.
- * Si se pasa sheetName, usa el endpoint gviz/tq que permite especificar la pestaña por nombre.
- * Requiere que la hoja esté compartida con "Cualquier persona con el enlace puede ver".
- * Devuelve null si no puede parsear el ID del spreadsheet.
+ * Convierte una URL normal de Google Sheets a la URL pública publicada en CSV.
+ * Acepta cualquiera de:
+ *  - https://docs.google.com/spreadsheets/d/<ID>/edit#gid=<GID>
+ *  - https://docs.google.com/spreadsheets/d/<ID>/pub?output=csv
+ *  - https://docs.google.com/spreadsheets/d/e/<LONG_ID>/pub?output=csv  (URL ya publicada)
+ * Devuelve null si no puede parsear.
  */
-export function toCsvUrl(rawUrl, sheetName = null) {
+export function toCsvUrl(rawUrl) {
   if (!rawUrl || typeof rawUrl !== 'string') return null
   const url = rawUrl.trim()
 
-  // Extraer el ID del spreadsheet (funciona con URLs de edición, pub y export)
-  const idMatch = url.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/)
-  if (!idMatch) return null
-  const id = idMatch[1]
-
-  // Si se especifica nombre de pestaña, usar gviz/tq (acepta nombre directo sin necesitar GID)
-  if (sheetName && sheetName.trim()) {
-    return `https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName.trim())}`
-  }
-
-  // Sin nombre de pestaña: URL ya publicada como CSV — la dejamos tal cual
+  // Ya está publicada como CSV — la dejamos tal cual
   if (/\/pub(\?|$)/.test(url) && /output=csv/.test(url)) return url
 
   // Ya está publicada (formato /pub) pero sin output=csv
-  if (/\/spreadsheets\/d\/e\//.test(url)) {
+  const pubMatch = url.match(/\/spreadsheets\/d\/e\/([a-zA-Z0-9-_]+)\/pub/)
+  if (pubMatch) {
     const sep = url.includes('?') ? '&' : '?'
     return `${url}${sep}output=csv`
   }
 
-  // URL de edición clásica — export por GID (lee la pestaña del gid indicado)
-  const gidMatch = url.match(/[?&#]gid=([0-9]+)/)
-  const gid = gidMatch ? gidMatch[1] : '0'
-  return `https://docs.google.com/spreadsheets/d/${id}/export?format=csv&gid=${gid}`
+  // URL de edit clásica — extraemos ID y GID
+  const idMatch = url.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/)
+  if (idMatch) {
+    const id = idMatch[1]
+    const gidMatch = url.match(/[?&#]gid=([0-9]+)/)
+    const gid = gidMatch ? gidMatch[1] : '0'
+    // Formato export — sirve si la hoja es accesible públicamente,
+    // PERO muchas veces CORS bloquea esto. La vía recomendada es pub?output=csv.
+    return `https://docs.google.com/spreadsheets/d/${id}/export?format=csv&gid=${gid}`
+  }
+
+  return null
 }
 
 /**
@@ -43,7 +44,7 @@ export function toCsvUrl(rawUrl, sheetName = null) {
 export async function fetchAndParseCsv(csvUrl, schemaType = 'pulso') {
   const resp = await fetch(csvUrl)
   if (!resp.ok) {
-    throw new Error(`No se pudo acceder al Sheet (HTTP ${resp.status}). Verificá que esté compartido con "Cualquier persona con el enlace puede ver".`)
+    throw new Error(`No se pudo acceder al Sheet (HTTP ${resp.status}). Verificá que esté publicado como CSV.`)
   }
   const text = await resp.text()
 
@@ -52,7 +53,7 @@ export async function fetchAndParseCsv(csvUrl, schemaType = 'pulso') {
   })
 
   if (parsed.errors.length > 0 && parsed.errors[0].type === 'Delimiter') {
-    throw new Error('No se pudo leer la hoja. Verificá que la URL sea de Google Sheets y que esté compartida con acceso público de lectura.')
+    throw new Error('El archivo no parece un CSV válido. ¿Publicaste la hoja como CSV?')
   }
 
   const matrix = parsed.data
@@ -61,7 +62,7 @@ export async function fetchAndParseCsv(csvUrl, schemaType = 'pulso') {
   // En los recopiladores Cosude, las preguntas están en la ÚLTIMA fila que contiene
   // la primera pregunta. Buscamos qué fila contiene la primera pregunta del esquema.
   const questions = schemaType === 'pulso' ? PULSO_QUESTIONS : AVANCE_OBJETIVOS
-  const firstQuestionTarget = normalize(questions[0].full).replace(/[.!?,;]+$/, '').trim().slice(0, 40)
+  const firstQuestionText = normalize(questions[0].full)
 
   let headerRowIdx = -1
   const colMap = {}  // questionId -> columnIndex
@@ -69,8 +70,7 @@ export async function fetchAndParseCsv(csvUrl, schemaType = 'pulso') {
   for (let r = 0; r < Math.min(matrix.length, 10); r++) {
     const row = matrix[r]
     for (let c = 0; c < row.length; c++) {
-      const cellNorm = normalize(row[c]).replace(/[.!?,;]+$/, '').trim()
-      if (cellNorm.includes(firstQuestionTarget) || firstQuestionTarget.includes(cellNorm.slice(0, 25))) {
+      if (normalize(row[c]).includes(firstQuestionText.slice(0, 40))) {
         headerRowIdx = r
         break
       }
@@ -88,11 +88,9 @@ export async function fetchAndParseCsv(csvUrl, schemaType = 'pulso') {
   // Mapear cada pregunta a su columna, buscando match por texto normalizado
   const headerRow = matrix[headerRowIdx]
   for (const q of questions) {
-    // Strip trailing punctuation before comparing — some sheets omit the final period
-    const target = normalize(q.full).replace(/[.!?,;]+$/, '').trim().slice(0, 40)
+    const target = normalize(q.full).slice(0, 40)
     for (let c = 0; c < headerRow.length; c++) {
-      const cellNorm = normalize(headerRow[c]).replace(/[.!?,;]+$/, '').trim()
-      if (cellNorm.includes(target) || target.includes(cellNorm.slice(0, 25))) {
+      if (normalize(headerRow[c]).includes(target)) {
         colMap[q.id] = c
         break
       }
@@ -104,32 +102,14 @@ export async function fetchAndParseCsv(csvUrl, schemaType = 'pulso') {
     console.warn(`Solo se mapearon ${foundCount} de ${questions.length} preguntas`)
   }
 
-  // --- Detectar columna de timestamp dinámicamente ---
-  // Buscamos en todas las filas hasta (e incluyendo) el header alguna celda con texto
-  // de fecha/hora. Si no se encuentra, quedamos sin timestamp (filas agrupadas en una sola sesión).
-  const tsKeywords = ['timestamp', 'marca de tiempo', 'fecha', 'time', 'hora', 'date']
-  let timestampColIdx = null
-  outer: for (let r = 0; r <= headerRowIdx; r++) {
-    for (let c = 0; c < matrix[r].length; c++) {
-      const cellNorm = normalize(matrix[r][c])
-      if (tsKeywords.some(kw => cellNorm.includes(kw))) {
-        timestampColIdx = c
-        break outer
-      }
-    }
-  }
-  // Fallback al índice fijo original si el header no lo reveló
-  if (timestampColIdx === null) timestampColIdx = META_COLS.timestamp
-
   // --- Extraer filas de respuestas ---
+  // Las respuestas empiezan DESPUÉS de la fila de headers
+  // y contienen un timestamp en la columna 3
   const rows = []
   for (let r = headerRowIdx + 1; r < matrix.length; r++) {
     const row = matrix[r]
-
-    // Saltar filas completamente vacías
-    if (row.every(cell => !cell || !String(cell).trim())) continue
-
-    const ts = row[timestampColIdx]
+    const ts = row[META_COLS.timestamp]
+    if (!ts || !ts.trim()) continue  // fila vacía
 
     const responses = {}
     let hasAnyResponse = false
@@ -147,7 +127,7 @@ export async function fetchAndParseCsv(csvUrl, schemaType = 'pulso') {
     if (hasAnyResponse) {
       rows.push({
         timestamp: parseTimestamp(ts),
-        rawTimestamp: ts || '',
+        rawTimestamp: ts,
         responseId: row[META_COLS.responseId] || '',
         responses,
       })
@@ -210,30 +190,24 @@ function parseTimestamp(ts) {
 export function groupBySessions(rows) {
   const groups = new Map()
   for (const row of rows) {
-    // Si no hay timestamp, todas las filas sin fecha van a un grupo único
-    const key = row.timestamp ? dateKey(row.timestamp) : '__sin_fecha__'
+    if (!row.timestamp) continue
+    const key = dateKey(row.timestamp)
     if (!groups.has(key)) {
       groups.set(key, {
         sessionKey: key,
-        date: row.timestamp || null,
+        date: row.timestamp,
         rows: [],
       })
     }
     groups.get(key).rows.push(row)
   }
 
-  // Ordenar cronológicamente; el grupo sin fecha va al final
-  const sorted = Array.from(groups.values()).sort((a, b) => {
-    if (!a.date && !b.date) return 0
-    if (!a.date) return 1
-    if (!b.date) return -1
-    return a.date - b.date
-  })
-
+  // Ordenar cronológicamente y asignar label Sesión 1, 2, ...
+  const sorted = Array.from(groups.values()).sort((a, b) => a.date - b.date)
   return sorted.map((g, i) => ({
     ...g,
     label: `Sesión ${i + 1}`,
-    shortDate: g.date ? formatShortDate(g.date) : 'Actual',
+    shortDate: formatShortDate(g.date),
   }))
 }
 
