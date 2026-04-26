@@ -167,17 +167,38 @@ function parseLikertValue(raw) {
   return null
 }
 
-/** Parsea el timestamp del CSV. Acepta mm/dd/yyyy y mm/dd/yyyy hh:mm:ss */
+const MONTH_NAMES = { jan:0, feb:1, mar:2, apr:3, may:4, jun:5, jul:6, aug:7, sep:8, oct:9, nov:10, dec:11 }
+
+/** Parsea el timestamp del CSV. Acepta múltiples formatos de fecha. */
 function parseTimestamp(ts) {
   if (!ts) return null
   const s = String(ts).trim()
-  // Formato mm/dd/yyyy hh:mm:ss
-  const m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/)
-  if (m) {
-    const [_, mm, dd, yyyy, hh = '0', mi = '0', ss = '0'] = m
+
+  // Formato: "Mon 20 Apr, 18:34:43 GMT 2026"
+  const mNamed = s.match(/^\w{3}\s+(\d{1,2})\s+(\w{3}),?\s+(\d{1,2}):(\d{2}):(\d{2})\s+\w+\s+(\d{4})/)
+  if (mNamed) {
+    const [_, dd, mon, hh, mi, ss, yyyy] = mNamed
+    const month = MONTH_NAMES[mon.toLowerCase()]
+    if (month !== undefined)
+      return new Date(parseInt(yyyy), month, parseInt(dd), parseInt(hh), parseInt(mi), parseInt(ss))
+  }
+
+  // Formato mm/dd/yyyy hh:mm:ss  (barras, mes primero)
+  const mSlash = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/)
+  if (mSlash) {
+    const [_, mm, dd, yyyy, hh = '0', mi = '0', ss = '0'] = mSlash
     const y = yyyy.length === 2 ? 2000 + parseInt(yyyy, 10) : parseInt(yyyy, 10)
     return new Date(y, parseInt(mm) - 1, parseInt(dd), parseInt(hh), parseInt(mi), parseInt(ss))
   }
+
+  // Formato yy-mm-dd o yyyy-mm-dd  (guiones, año primero)
+  const mDash = s.match(/^(\d{2,4})-(\d{1,2})-(\d{1,2})(?:[T\s](\d{1,2}):(\d{2})(?::(\d{2}))?)?/)
+  if (mDash) {
+    const [_, yyyy, mm, dd, hh = '0', mi = '0', ss = '0'] = mDash
+    const y = yyyy.length === 2 ? 2000 + parseInt(yyyy, 10) : parseInt(yyyy, 10)
+    return new Date(y, parseInt(mm) - 1, parseInt(dd), parseInt(hh), parseInt(mi), parseInt(ss))
+  }
+
   const d = new Date(s)
   return isNaN(d.getTime()) ? null : d
 }
