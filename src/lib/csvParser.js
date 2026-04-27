@@ -157,6 +157,10 @@ export async function fetchAndParseCsv(csvUrl, schemaType = 'pulso') {
     })
   }
 
+  // Tomar la primera celda de respuesta de la primera pregunta para diagnóstico
+  const firstQCol = colMap[questions[0].id]
+  const firstQValue = firstQCol != null ? ((matrix[headerRowIdx + 1] || [])[firstQCol] || '') : 'columna no mapeada'
+
   return {
     meta: {
       totalResponses: rows.length,
@@ -165,6 +169,7 @@ export async function fetchAndParseCsv(csvUrl, schemaType = 'pulso') {
       headerRowIdx,
       tsCol,
       firstTsValue: tsCol >= 0 ? ((matrix[headerRowIdx + 1] || [])[tsCol] || '') : '',
+      firstQValue,
     },
     rows,
   }

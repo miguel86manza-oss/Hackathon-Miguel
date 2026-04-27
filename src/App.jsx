@@ -119,8 +119,8 @@ export default function App() {
         const pm = results.pulsoMeta
         const am = results.avanceMeta
         const diag = []
-        if (pm) diag.push(`Pulso → encabezado en fila ${pm.headerRowIdx}, preguntas encontradas: ${pm.questionsFound}/${pm.questionsTotal}, col. timestamp: ${pm.tsCol} (valor: "${pm.firstTsValue}")`)
-        if (am) diag.push(`Avance → encabezado en fila ${am.headerRowIdx}, objetivos encontrados: ${am.questionsFound}/${am.questionsTotal}, col. timestamp: ${am.tsCol} (valor: "${am.firstTsValue}")`)
+        if (pm) diag.push(`Pulso → encabezado fila ${pm.headerRowIdx}, preguntas: ${pm.questionsFound}/${pm.questionsTotal}, timestamp col ${pm.tsCol}: "${pm.firstTsValue}", primer valor de respuesta: "${pm.firstQValue}"`)
+        if (am) diag.push(`Avance → encabezado fila ${am.headerRowIdx}, objetivos: ${am.questionsFound}/${am.questionsTotal}, timestamp col ${am.tsCol}: "${am.firstTsValue}", primer valor de respuesta: "${am.firstQValue}"`)
         setStatus('Conectado pero sin filas válidas. ' + diag.join(' | '))
         setStatusType('error')
       } else {
