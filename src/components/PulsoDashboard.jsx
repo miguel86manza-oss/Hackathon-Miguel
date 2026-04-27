@@ -10,20 +10,25 @@ const DIMS = [...PULSO_DIMENSIONS].sort((a, b) => a.id.localeCompare(b.id))
 const ALL_IDS = PULSO_QUESTIONS.map(q => q.id)
 
 function computeFav(session, qids) {
-  let fav = 0, neu = 0, dis = 0, total = 0
-  for (const row of session.rows) {
-    for (const qid of qids) {
+  // Calcula % por pregunta y promedia — así el resultado coincide con
+  // el promedio manual de los porcentajes individuales de cada afirmación.
+  let favSum = 0, neuSum = 0, disSum = 0, count = 0
+  for (const qid of qids) {
+    let f = 0, n = 0, d = 0, t = 0
+    for (const row of session.rows) {
       const v = row.responses[qid]
       if (v != null) {
-        total++
-        if (v >= 4) fav++
-        else if (v === 3) neu++
-        else dis++
+        t++
+        if (v >= 4) f++
+        else if (v === 3) n++
+        else d++
       }
     }
+    if (t > 0) { favSum += f / t; neuSum += n / t; disSum += d / t; count++ }
   }
-  const pct = n => total ? Math.round(n / total * 1000) / 10 : 0
-  return { favorable: pct(fav), neutral: pct(neu), unfavorable: pct(dis), n: total }
+  if (count === 0) return { favorable: 0, neutral: 0, unfavorable: 0, n: 0 }
+  const pct = x => Math.round(x / count * 1000) / 10
+  return { favorable: pct(favSum), neutral: pct(neuSum), unfavorable: pct(disSum), n: session.rows.length }
 }
 
 function FavTooltip({ active, payload, label }) {
