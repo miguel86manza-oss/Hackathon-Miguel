@@ -2,7 +2,6 @@ import React, { useState } from 'react'
 import { AVANCE_OBJETIVOS, AVANCE_LABELS } from '../lib/schema.js'
 import { groupBySessions } from '../lib/csvParser.js'
 
-// Distribución de respuestas (1,2,3) como % para un objetivo en una sesión
 function computeDist(session, objId) {
   const counts = { 1: 0, 2: 0, 3: 0 }
   let total = 0
@@ -17,7 +16,6 @@ function computeDist(session, objId) {
   return { 1: pct(counts[1]), 2: pct(counts[2]), 3: pct(counts[3]), n: total }
 }
 
-// % de nivel 3 (Realizado) en todos los objetivos de una sesión
 function pctRealizado(session) {
   let done = 0, total = 0
   for (const row of session.rows) {
@@ -51,31 +49,55 @@ export default function AvanceDashboard({ rows, isDemo }) {
   }))
 
   const lastIdx = perSession.length - 1
-  const last    = perSession[lastIdx]
-  const prev    = perSession.length > 1 ? perSession[lastIdx - 1] : null
-  const first   = perSession[0]
 
-  const delta     = prev ? Math.round((last.pctReal - prev.pctReal) * 10) / 10 : null
-  const variation = Math.round((last.pctReal - first.pctReal) * 10) / 10
+  // 'all' muestra todas las sesiones; número = índice de sesión seleccionada
+  const [filterIdx, setFilterIdx] = useState('all')
 
-  // Filtro local de "Estado actual": 'all' o índice de sesión
-  const [estadoFilter, setEstadoFilter] = useState('all')
+  const isAll = filterIdx === 'all'
+  const safeIdx = isAll ? lastIdx : Math.min(filterIdx, lastIdx)
 
-  const isAll = estadoFilter === 'all'
-  const filterIdx = !isAll ? Math.min(estadoFilter, lastIdx) : null
-  const filteredSessions = isAll ? perSession : [perSession[filterIdx]]
+  // Para KPIs usamos la sesión focal (seleccionada o última)
+  const focused = perSession[safeIdx]
+  const prevFocused = safeIdx > 0 ? perSession[safeIdx - 1] : null
+  const first = perSession[0]
+
+  const delta = prevFocused ? Math.round((focused.pctReal - prevFocused.pctReal) * 10) / 10 : null
+  const variation = Math.round((focused.pctReal - first.pctReal) * 10) / 10
+
+  // Sesiones visibles en las secciones comparativas
+  const visibleSessions = isAll ? perSession : [perSession[safeIdx]]
 
   return (
     <>
+      {/* === Filtro de sesión === */}
+      <div className="session-filter">
+        <span className="session-filter__label">Sesión seleccionada:</span>
+        <button
+          className={`session-pill ${isAll ? 'active' : ''}`}
+          onClick={() => setFilterIdx('all')}
+        >
+          Todas
+        </button>
+        {perSession.map(({ session }, idx) => (
+          <button
+            key={session.label}
+            className={`session-pill ${!isAll && safeIdx === idx ? 'active' : ''}`}
+            onClick={() => setFilterIdx(idx)}
+          >
+            {session.label} · {session.shortDate}
+          </button>
+        ))}
+      </div>
+
       {/* === KPIs === */}
       <div className="kpis">
         <div className="kpi kpi--primary">
           <div className="kpi__label">Avance consolidado (% Realizados)</div>
           <div className="kpi__value">
-            {last.pctReal.toFixed(1)}<span className="unit">%</span>
+            {focused.pctReal.toFixed(1)}<span className="unit">%</span>
           </div>
           <div className="kpi__caption">
-            {last.session.label} ({last.session.shortDate}) · n = {last.session.rows.length} resp.
+            {focused.session.label} ({focused.session.shortDate}) · n = {focused.session.rows.length} resp.
           </div>
           {delta != null && (
             <div className={`kpi__delta ${delta > 0 ? 'up' : delta < 0 ? 'down' : 'flat'}`}>
@@ -99,21 +121,21 @@ export default function AvanceDashboard({ rows, isDemo }) {
         </div>
       </div>
 
-      {/* === Progreso por objetivo entre sesiones (barras apiladas horizontales con valores) === */}
+      {/* === Progreso por objetivo entre sesiones (barras apiladas horizontales) === */}
       <section className="card">
         <div className="card__head">
           <div>
             <h3 className="card__title">Progreso por objetivo entre sesiones</h3>
             <p className="card__subtitle">Distribución de respuestas por nivel · % de participantes</p>
           </div>
-          <span className="card__meta">escala 1–3 · {sessions.length} sesiones</span>
+          <span className="card__meta">escala 1–3 · {visibleSessions.length} sesión{visibleSessions.length !== 1 ? 'es' : ''}</span>
         </div>
 
         <div className="dim-stacks">
           {AVANCE_OBJETIVOS.map(obj => (
             <div className="dim-stack-block" key={obj.id}>
               <div className="dim-stack-block__label" title={obj.full}>{obj.short}</div>
-              {perSession.map(({ session, dist }) => {
+              {visibleSessions.map(({ session, dist }) => {
                 const d = dist[obj.id]
                 return (
                   <div className="stack-row" key={session.label}>
@@ -149,32 +171,13 @@ export default function AvanceDashboard({ rows, isDemo }) {
         </div>
       </section>
 
-      {/* === Estado actual por objetivo (con filtro de sesión) === */}
+      {/* === Estado actual por objetivo === */}
       <section className="card">
         <div className="card__head">
           <div>
             <h3 className="card__title">Estado actual por objetivo</h3>
             <p className="card__subtitle">% de participantes por nivel de avance · comparación entre sesiones</p>
           </div>
-        </div>
-
-        <div className="session-filter" style={{ marginTop: 4 }}>
-          <span className="session-filter__label">Filtrar por sesión:</span>
-          <button
-            className={`session-pill ${isAll ? 'active' : ''}`}
-            onClick={() => setEstadoFilter('all')}
-          >
-            Todas
-          </button>
-          {perSession.map(({ session }, idx) => (
-            <button
-              key={session.label}
-              className={`session-pill ${filterIdx === idx ? 'active' : ''}`}
-              onClick={() => setEstadoFilter(idx)}
-            >
-              {session.label} · {session.shortDate}
-            </button>
-          ))}
         </div>
 
         <div className="avance-table">
@@ -185,7 +188,7 @@ export default function AvanceDashboard({ rows, isDemo }) {
             <span>En proceso</span>
             <span>Realizado</span>
           </div>
-          {filteredSessions.flatMap(({ session, dist }) =>
+          {visibleSessions.flatMap(({ session, dist }) =>
             AVANCE_OBJETIVOS.map(obj => (
               <div className="avance-table__row" key={`${session.label}-${obj.id}`}>
                 <span className="avance-table__session">{session.label}</span>

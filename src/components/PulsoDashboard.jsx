@@ -9,7 +9,6 @@ import { groupBySessions } from '../lib/csvParser.js'
 const DIMS = [...PULSO_DIMENSIONS].sort((a, b) => a.id.localeCompare(b.id))
 const ALL_IDS = PULSO_QUESTIONS.map(q => q.id)
 
-// Calcula favorabilidad / neutralidad / desfavorabilidad para un conjunto de qids en una sesión
 function computeFav(session, qids) {
   let fav = 0, neu = 0, dis = 0, total = 0
   for (const row of session.rows) {
@@ -63,19 +62,27 @@ export default function PulsoDashboard({ rows, isDemo }) {
     qFav: Object.fromEntries(PULSO_QUESTIONS.map(q => [q.id, computeFav(s, [q.id]).favorable])),
   }))
 
-  // --- Filtro de sesión seleccionada ---
   const lastIdx = perSession.length - 1
-  const [selectedIdx, setSelectedIdx] = useState(lastIdx)
-  const safeIdx  = Math.min(selectedIdx, lastIdx)
-  const selected = perSession[safeIdx]
-  const prevOfSelected = safeIdx > 0 ? perSession[safeIdx - 1] : null
-  const first    = perSession[0]
 
-  const globalFav = selected.fav.favorable
-  const delta     = prevOfSelected ? Math.round((globalFav - prevOfSelected.fav.favorable) * 10) / 10 : null
+  // 'all' muestra todas las sesiones; número = índice de sesión seleccionada
+  const [filterIdx, setFilterIdx] = useState(lastIdx)
+
+  const isAll = filterIdx === 'all'
+  const safeIdx = isAll ? lastIdx : Math.min(filterIdx, lastIdx)
+
+  // Para KPIs usamos siempre la sesión "focal": la seleccionada o la última si es "all"
+  const focused    = perSession[safeIdx]
+  const prevFocused = safeIdx > 0 ? perSession[safeIdx - 1] : null
+  const first      = perSession[0]
+
+  const globalFav = focused.fav.favorable
+  const delta     = prevFocused ? Math.round((globalFav - prevFocused.fav.favorable) * 10) / 10 : null
   const variation = Math.round((globalFav - first.fav.favorable) * 10) / 10
 
-  // Línea temporal
+  // Sesiones visibles en las secciones comparativas
+  const visibleSessions = isAll ? perSession : [perSession[safeIdx]]
+
+  // Línea temporal — siempre muestra todas las sesiones para dar contexto
   const timelineData = perSession.map(({ session, fav }) => ({
     session: session.label,
     Favorabilidad: fav.favorable,
@@ -86,11 +93,17 @@ export default function PulsoDashboard({ rows, isDemo }) {
       {/* === Filtro de sesión === */}
       <div className="session-filter">
         <span className="session-filter__label">Sesión seleccionada:</span>
+        <button
+          className={`session-pill ${isAll ? 'active' : ''}`}
+          onClick={() => setFilterIdx('all')}
+        >
+          Todas
+        </button>
         {perSession.map(({ session }, idx) => (
           <button
             key={session.label}
-            className={`session-pill ${idx === safeIdx ? 'active' : ''}`}
-            onClick={() => setSelectedIdx(idx)}
+            className={`session-pill ${!isAll && safeIdx === idx ? 'active' : ''}`}
+            onClick={() => setFilterIdx(idx)}
           >
             {session.label} · {session.shortDate}
           </button>
@@ -105,7 +118,7 @@ export default function PulsoDashboard({ rows, isDemo }) {
             {globalFav.toFixed(1)}<span className="unit">%</span>
           </div>
           <div className="kpi__caption">
-            {selected.session.label} ({selected.session.shortDate}) · n = {selected.session.rows.length} resp.
+            {focused.session.label} ({focused.session.shortDate}) · n = {focused.session.rows.length} resp.
           </div>
           {delta != null && (
             <div className={`kpi__delta ${delta > 0 ? 'up' : delta < 0 ? 'down' : 'flat'}`}>
@@ -168,8 +181,8 @@ export default function PulsoDashboard({ rows, isDemo }) {
                 activeDot={{ r: 7, fill: 'var(--turquesa)', stroke: 'var(--white)', strokeWidth: 2 }}
               />
               <ReferenceDot
-                x={selected.session.label}
-                y={selected.fav.favorable}
+                x={focused.session.label}
+                y={focused.fav.favorable}
                 r={9}
                 fill="var(--magenta-1)"
                 stroke="var(--white)"
@@ -178,42 +191,6 @@ export default function PulsoDashboard({ rows, isDemo }) {
               />
             </LineChart>
           </ResponsiveContainer>
-        </div>
-      </section>
-
-      {/* === Favorabilidad por afirmación (comparativa) === */}
-      <section className="card">
-        <div className="card__head">
-          <div>
-            <h3 className="card__title">Favorabilidad por afirmación</h3>
-            <p className="card__subtitle">Comparativa por sesión · % de respuestas favorables (4–5)</p>
-          </div>
-        </div>
-        <div className="dims">
-          {DIMS.map(dim => (
-            <React.Fragment key={dim.id}>
-              <div className="dim-group-label">{dim.label}</div>
-              {dim.questions.map(qid => {
-                const q = PULSO_QUESTIONS.find(q => q.id === qid)
-                return (
-                  <div className="comp-question" key={qid}>
-                    <div className="comp-question__title" title={q.full}>{q.short}</div>
-                    <div className="comp-question__rows">
-                      {perSession.map(({ session, qFav }, idx) => (
-                        <div className={`comp-row ${idx === safeIdx ? 'comp-row--active' : ''}`} key={session.label}>
-                          <span className="comp-row__label">{session.label}</span>
-                          <div className="comp-row__bar">
-                            <div className="comp-row__fill" style={{ width: `${qFav[qid]}%` }} />
-                          </div>
-                          <span className="comp-row__value">{qFav[qid].toFixed(0)}%</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )
-              })}
-            </React.Fragment>
-          ))}
         </div>
       </section>
 
@@ -230,10 +207,11 @@ export default function PulsoDashboard({ rows, isDemo }) {
           {DIMS.map(dim => (
             <div className="dim-stack-block" key={dim.id}>
               <div className="dim-stack-block__label">{dim.label}</div>
-              {perSession.map(({ session }, idx) => {
+              {visibleSessions.map(({ session }, idx) => {
                 const stats = computeFav(session, dim.questions)
+                const origIdx = perSession.findIndex(p => p.session.label === session.label)
                 return (
-                  <div className={`stack-row ${idx === safeIdx ? 'stack-row--active' : ''}`} key={session.label}>
+                  <div className={`stack-row ${origIdx === safeIdx && !isAll ? 'stack-row--active' : ''}`} key={session.label}>
                     <span className="stack-row__label">{session.label}</span>
                     <div className="stack-row__bar">
                       {stats.unfavorable > 0 && (
@@ -263,6 +241,42 @@ export default function PulsoDashboard({ rows, isDemo }) {
           <span className="stack-legend__item"><span className="stack-legend__sw stack-legend__sw--unf" />Desfavorable (1–2)</span>
           <span className="stack-legend__item"><span className="stack-legend__sw stack-legend__sw--neu" />Neutral (3)</span>
           <span className="stack-legend__item"><span className="stack-legend__sw stack-legend__sw--fav" />Favorable (4–5)</span>
+        </div>
+      </section>
+
+      {/* === Favorabilidad por afirmación (comparativa) === */}
+      <section className="card">
+        <div className="card__head">
+          <div>
+            <h3 className="card__title">Favorabilidad por afirmación</h3>
+            <p className="card__subtitle">Comparativa por sesión · % de respuestas favorables (4–5)</p>
+          </div>
+        </div>
+        <div className="dims">
+          {DIMS.map(dim => (
+            <React.Fragment key={dim.id}>
+              <div className="dim-group-label">{dim.label}</div>
+              {dim.questions.map(qid => {
+                const q = PULSO_QUESTIONS.find(q => q.id === qid)
+                return (
+                  <div className="comp-question" key={qid}>
+                    <div className="comp-question__title" title={q.full}>{q.short}</div>
+                    <div className="comp-question__rows">
+                      {visibleSessions.map(({ session, qFav }) => (
+                        <div className="comp-row" key={session.label}>
+                          <span className="comp-row__label">{session.label}</span>
+                          <div className="comp-row__bar">
+                            <div className="comp-row__fill" style={{ width: `${qFav[qid]}%` }} />
+                          </div>
+                          <span className="comp-row__value">{qFav[qid].toFixed(0)}%</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )
+              })}
+            </React.Fragment>
+          ))}
         </div>
       </section>
     </>

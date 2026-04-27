@@ -39,6 +39,11 @@ export default function App() {
   const [loading, setLoading] = useState(false)
   const [status, setStatus] = useState('')
   const [statusType, setStatusType] = useState('')  // '' | 'ok' | 'error'
+  const [lastUpdated, setLastUpdated] = useState(null)
+
+  const connectRef = useRef(null)
+  const isDemoRef  = useRef(isDemo)
+  useEffect(() => { isDemoRef.current = isDemo }, [isDemo])
 
   // Persistir config
   useEffect(() => {
@@ -99,18 +104,33 @@ export default function App() {
 
     if (anyOk) setIsDemo(false)
 
+    const now = new Date()
+    const timeStr = now.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })
+
     if (results.errors.length > 0) {
       setStatus('Algunos Sheets no pudieron cargarse: ' + results.errors.join(' · '))
       setStatusType(anyOk ? '' : 'error')
     } else {
       const p = results.pulso?.length || 0
       const a = results.avance?.length || 0
-      setStatus(`Conectado. Pulso: ${p} respuestas · Avance: ${a} respuestas.`)
+      setStatus(`Conectado. Pulso: ${p} respuestas · Avance: ${a} respuestas. Última actualización: ${timeStr}`)
       setStatusType('ok')
     }
 
+    if (anyOk) setLastUpdated(now)
     setLoading(false)
   }, [urlPulso, urlAvance])
+
+  // Mantener ref actualizada para el intervalo
+  useEffect(() => { connectRef.current = handleConnect }, [handleConnect])
+
+  // Auto-refresh cada 60 s cuando hay datos en vivo
+  useEffect(() => {
+    const id = setInterval(() => {
+      if (!isDemoRef.current) connectRef.current?.()
+    }, 60_000)
+    return () => clearInterval(id)
+  }, [])
 
   const handleReset = () => {
     setPulsoRows(MOCK_PULSO_ROWS)
