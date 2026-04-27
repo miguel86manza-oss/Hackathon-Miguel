@@ -30,9 +30,11 @@
   --likert-5:      var(--turquesa);    /* Muy de acuerdo */
 
   /* Avance */
+  --verde-oscuro:  #1b5e20;
+  --verde-claro:   #2e7d32;
   --avance-1:      var(--magenta-2);   /* No realizado */
-  --avance-2:      var(--turquesa-sec); /* En proceso */
-  --avance-3:      var(--turquesa);    /* Realizado */
+  --avance-2:      var(--verde-claro); /* En proceso */
+  --avance-3:      var(--verde-oscuro); /* Realizado */
 
   --font: 'Poppins', system-ui, sans-serif;
   --radius:        12px;
@@ -698,9 +700,9 @@ body { min-height: 100vh; }
 .stack-row__seg--unf  { background: var(--magenta-2); }
 .stack-row__seg--neu  { background: var(--gris-2);   color: var(--marengo); }
 .stack-row__seg--fav  { background: var(--turquesa); }
-.stack-row__seg--av1  { background: var(--magenta-2); }
-.stack-row__seg--av2  { background: var(--turquesa-sec); }
-.stack-row__seg--av3  { background: var(--turquesa); }
+.stack-row__seg--av1  { background: var(--avance-1); }
+.stack-row__seg--av2  { background: var(--avance-2); }
+.stack-row__seg--av3  { background: var(--avance-3); }
 .stack-row--active .stack-row__label {
   color: var(--magenta-1);
   font-weight: 700;
@@ -730,9 +732,9 @@ body { min-height: 100vh; }
 .stack-legend__sw--unf { background: var(--magenta-2); }
 .stack-legend__sw--neu { background: var(--gris-2); }
 .stack-legend__sw--fav { background: var(--turquesa); }
-.stack-legend__sw--av1 { background: var(--magenta-2); }
-.stack-legend__sw--av2 { background: var(--turquesa-sec); }
-.stack-legend__sw--av3 { background: var(--turquesa); }
+.stack-legend__sw--av1 { background: var(--avance-1); }
+.stack-legend__sw--av2 { background: var(--avance-2); }
+.stack-legend__sw--av3 { background: var(--avance-3); }
 
 /* Tabla de estado actual en Avance de Objetivos */
 .avance-table {

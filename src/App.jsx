@@ -21,6 +21,7 @@ function saveConfig(cfg) {
 }
 
 export default function App() {
+  const isAdmin = new URLSearchParams(window.location.search).has('admin')
   const saved = loadConfig() || {}
 
   // Config
@@ -144,6 +145,14 @@ export default function App() {
     return () => clearInterval(id)
   }, [])
 
+  // Vista pública: carga automática al abrir si hay URLs guardadas
+  useEffect(() => {
+    if (!isAdmin && (urlPulso || urlAvance)) {
+      handleConnect()
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   const handleReset = () => {
     setPulsoRows(MOCK_PULSO_ROWS)
     setAvanceRows(MOCK_AVANCE_ROWS)
@@ -160,21 +169,23 @@ export default function App() {
         isDemo={isDemo}
       />
 
-      <ConfigPanel
-        urlPulso={urlPulso}
-        urlAvance={urlAvance}
-        companyName={companyName}
-        logoUrl={logoUrl}
-        onChangeUrlPulso={setUrlPulso}
-        onChangeUrlAvance={setUrlAvance}
-        onChangeCompany={setCompanyName}
-        onChangeLogo={setLogoUrl}
-        onConnect={handleConnect}
-        onReset={handleReset}
-        loading={loading}
-        status={status}
-        statusType={statusType}
-      />
+      {isAdmin && (
+        <ConfigPanel
+          urlPulso={urlPulso}
+          urlAvance={urlAvance}
+          companyName={companyName}
+          logoUrl={logoUrl}
+          onChangeUrlPulso={setUrlPulso}
+          onChangeUrlAvance={setUrlAvance}
+          onChangeCompany={setCompanyName}
+          onChangeLogo={setLogoUrl}
+          onConnect={handleConnect}
+          onReset={handleReset}
+          loading={loading}
+          status={status}
+          statusType={statusType}
+        />
+      )}
 
       <div className="tabs" role="tablist">
         <button
