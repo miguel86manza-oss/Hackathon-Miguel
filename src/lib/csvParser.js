@@ -185,16 +185,36 @@ function normalize(s) {
     .trim()
 }
 
-/** Parsea un valor Likert. Acepta números, o texto tipo "4. De acuerdo". */
 function parseLikertValue(raw) {
   if (raw == null || raw === '') return null
   const s = String(raw).trim()
-  // Buscar el primer dígito 1-5
-  const m = s.match(/^([1-5])/)
-  if (m) return parseInt(m[1], 10)
-  // Si es solo un número sin prefijo
-  const n = parseFloat(s)
+  if (!s) return null
+
+  // Digito 1-5 al inicio: "4", "4.", "4. De acuerdo", "4 - De acuerdo"
+  const mStart = s.match(/^([1-5])[\s.,\-]?/)
+  if (mStart) return parseInt(mStart[1], 10)
+
+  // Numero puro (con coma o punto decimal): "4.0", "4,0"
+  const n = parseFloat(s.replace(',', '.'))
   if (!isNaN(n) && n >= 1 && n <= 5) return Math.round(n)
+
+  // Etiquetas de texto en espanol (pulso 1-5)
+  const low = s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+  if (low.includes('muy en desacuerdo') || low.includes('totalmente en desacuerdo')) return 1
+  if (low.includes('en desacuerdo'))                                                  return 2
+  if (low.includes('ni de acuerdo') || low.includes('neutral'))                       return 3
+  if (low.includes('muy de acuerdo') || low.includes('totalmente de acuerdo'))        return 5
+  if (low.includes('de acuerdo'))                                                     return 4
+
+  // Etiquetas de texto en espanol (avance 1-3)
+  if (low.includes('no realizado') || low.includes('sin realizar'))                   return 1
+  if (low.includes('en proceso')   || low.includes('en progreso'))                    return 2
+  if (low.includes('realizado')    || low.includes('completado'))                     return 3
+
+  // Ultimo recurso: cualquier digito 1-5 en la cadena
+  const mAny = s.match(/[1-5]/)
+  if (mAny) return parseInt(mAny[0], 10)
+
   return null
 }
 
