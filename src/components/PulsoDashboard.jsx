@@ -1,7 +1,7 @@
-import React from 'react'
+import React, { useState } from 'react'
 import {
-  LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid,
-  Tooltip, ResponsiveContainer, ReferenceLine,
+  LineChart, Line, XAxis, YAxis, CartesianGrid,
+  Tooltip, ResponsiveContainer, ReferenceLine, ReferenceDot,
 } from 'recharts'
 import { PULSO_QUESTIONS, PULSO_DIMENSIONS } from '../lib/schema.js'
 import { groupBySessions } from '../lib/csvParser.js'
@@ -42,22 +42,6 @@ function FavTooltip({ active, payload, label }) {
   )
 }
 
-function DimStackTooltip({ active, payload, label }) {
-  if (!active || !payload?.length) return null
-  const dim = DIMS.find(d => d.id === label)
-  return (
-    <div className="tooltip">
-      <div className="tooltip__title">{dim ? dim.label : label}</div>
-      {[...payload].reverse().map(p => (
-        <div className="tooltip__row" key={p.dataKey}>
-          <span>{p.name}</span>
-          <strong>{p.value.toFixed(1)}%</strong>
-        </div>
-      ))}
-    </div>
-  )
-}
-
 export default function PulsoDashboard({ rows, isDemo }) {
   if (!rows || rows.length === 0) {
     return (
@@ -79,33 +63,40 @@ export default function PulsoDashboard({ rows, isDemo }) {
     qFav: Object.fromEntries(PULSO_QUESTIONS.map(q => [q.id, computeFav(s, [q.id]).favorable])),
   }))
 
-  const last   = perSession[perSession.length - 1]
-  const prev   = perSession.length > 1 ? perSession[perSession.length - 2] : null
-  const first  = perSession[0]
+  // --- Filtro de sesión seleccionada ---
+  const lastIdx = perSession.length - 1
+  const [selectedIdx, setSelectedIdx] = useState(lastIdx)
+  const safeIdx  = Math.min(selectedIdx, lastIdx)
+  const selected = perSession[safeIdx]
+  const prevOfSelected = safeIdx > 0 ? perSession[safeIdx - 1] : null
+  const first    = perSession[0]
 
-  const globalFav = last.fav.favorable
-  const delta     = prev != null ? Math.round((globalFav - prev.fav.favorable) * 10) / 10 : null
+  const globalFav = selected.fav.favorable
+  const delta     = prevOfSelected ? Math.round((globalFav - prevOfSelected.fav.favorable) * 10) / 10 : null
   const variation = Math.round((globalFav - first.fav.favorable) * 10) / 10
 
-  // Datos para el gráfico de línea
+  // Línea temporal
   const timelineData = perSession.map(({ session, fav }) => ({
     session: session.label,
     Favorabilidad: fav.favorable,
   }))
 
-  // Datos para gráfico de distribución por dimensión (última sesión)
-  const dimDistData = DIMS.map(dim => {
-    const stats = computeFav(last.session, dim.questions)
-    return {
-      dim: dim.id,
-      Favorable:     stats.favorable,
-      Neutral:       stats.neutral,
-      Desfavorable:  stats.unfavorable,
-    }
-  })
-
   return (
     <>
+      {/* === Filtro de sesión === */}
+      <div className="session-filter">
+        <span className="session-filter__label">Sesión seleccionada:</span>
+        {perSession.map(({ session }, idx) => (
+          <button
+            key={session.label}
+            className={`session-pill ${idx === safeIdx ? 'active' : ''}`}
+            onClick={() => setSelectedIdx(idx)}
+          >
+            {session.label} · {session.shortDate}
+          </button>
+        ))}
+      </div>
+
       {/* === KPIs === */}
       <div className="kpis">
         <div className="kpi kpi--primary">
@@ -114,7 +105,7 @@ export default function PulsoDashboard({ rows, isDemo }) {
             {globalFav.toFixed(1)}<span className="unit">%</span>
           </div>
           <div className="kpi__caption">
-            {last.session.label} ({last.session.shortDate}) · n = {last.session.rows.length} resp.
+            {selected.session.label} ({selected.session.shortDate}) · n = {selected.session.rows.length} resp.
           </div>
           {delta != null && (
             <div className={`kpi__delta ${delta > 0 ? 'up' : delta < 0 ? 'down' : 'flat'}`}>
@@ -126,7 +117,7 @@ export default function PulsoDashboard({ rows, isDemo }) {
         <div className="kpi">
           <div className="kpi__label">Sesiones registradas</div>
           <div className="kpi__value">{sessions.length}</div>
-          <div className="kpi__caption">{first.session.shortDate} → {last.session.shortDate}</div>
+          <div className="kpi__caption">{first.session.shortDate} → {perSession[lastIdx].session.shortDate}</div>
         </div>
 
         <div className="kpi">
@@ -176,99 +167,104 @@ export default function PulsoDashboard({ rows, isDemo }) {
                 dot={{ r: 5, fill: 'var(--white)', stroke: 'var(--turquesa)', strokeWidth: 2 }}
                 activeDot={{ r: 7, fill: 'var(--turquesa)', stroke: 'var(--white)', strokeWidth: 2 }}
               />
+              <ReferenceDot
+                x={selected.session.label}
+                y={selected.fav.favorable}
+                r={9}
+                fill="var(--magenta-1)"
+                stroke="var(--white)"
+                strokeWidth={2}
+                ifOverflow="extendDomain"
+              />
             </LineChart>
           </ResponsiveContainer>
         </div>
       </section>
 
-      {/* === Favorabilidad por afirmación + Distribución por dimensión === */}
-      <div className="split">
-        <section className="card">
-          <div className="card__head">
-            <div>
-              <h3 className="card__title">Favorabilidad por afirmación</h3>
-              <p className="card__subtitle">
-                Última sesión · % favorables (4–5) · marca rosa = sesión anterior
-              </p>
-            </div>
+      {/* === Favorabilidad por afirmación (comparativa) === */}
+      <section className="card">
+        <div className="card__head">
+          <div>
+            <h3 className="card__title">Favorabilidad por afirmación</h3>
+            <p className="card__subtitle">Comparativa por sesión · % de respuestas favorables (4–5)</p>
           </div>
-          <div className="dims">
-            {DIMS.map(dim => (
-              <React.Fragment key={dim.id}>
-                <div className="dim-group-label">{dim.label}</div>
-                {dim.questions.map(qid => {
-                  const q   = PULSO_QUESTIONS.find(q => q.id === qid)
-                  const cur = last.qFav[qid]
-                  const pr  = prev ? prev.qFav[qid] : null
-                  const d   = pr != null ? Math.round((cur - pr) * 10) / 10 : null
-                  const cls = d == null ? 'flat' : d > 0 ? 'up' : d < 0 ? 'down' : 'flat'
-                  return (
-                    <div className="dim" key={qid}>
-                      <div className="dim__head">
-                        <span className="dim__name" title={q.full}>{q.short}</span>
-                        <span className="dim__value">
-                          {cur.toFixed(1)}%
-                          {d != null && (
-                            <span className={`dim__delta ${cls}`}>
-                              {d > 0 ? '▲' : d < 0 ? '▼' : '◆'} {d > 0 ? '+' : ''}{d.toFixed(1)}%
-                            </span>
-                          )}
-                        </span>
-                      </div>
-                      <div className="dim__bar">
-                        <div className="dim__bar-fill" style={{ width: `${cur}%` }} />
-                        {pr != null && <div className="dim__bar-prev" style={{ left: `calc(${pr}% - 1px)` }} />}
-                      </div>
+        </div>
+        <div className="dims">
+          {DIMS.map(dim => (
+            <React.Fragment key={dim.id}>
+              <div className="dim-group-label">{dim.label}</div>
+              {dim.questions.map(qid => {
+                const q = PULSO_QUESTIONS.find(q => q.id === qid)
+                return (
+                  <div className="comp-question" key={qid}>
+                    <div className="comp-question__title" title={q.full}>{q.short}</div>
+                    <div className="comp-question__rows">
+                      {perSession.map(({ session, qFav }, idx) => (
+                        <div className={`comp-row ${idx === safeIdx ? 'comp-row--active' : ''}`} key={session.label}>
+                          <span className="comp-row__label">{session.label}</span>
+                          <div className="comp-row__bar">
+                            <div className="comp-row__fill" style={{ width: `${qFav[qid]}%` }} />
+                          </div>
+                          <span className="comp-row__value">{qFav[qid].toFixed(0)}%</span>
+                        </div>
+                      ))}
                     </div>
-                  )
-                })}
-              </React.Fragment>
-            ))}
-          </div>
-        </section>
+                  </div>
+                )
+              })}
+            </React.Fragment>
+          ))}
+        </div>
+      </section>
 
-        <section className="card">
-          <div className="card__head">
-            <div>
-              <h3 className="card__title">Distribución por dimensión</h3>
-              <p className="card__subtitle">Última sesión · favorabilidad, neutralidad y desfavorabilidad</p>
+      {/* === Distribución por dimensión (barras apiladas horizontales por sesión) === */}
+      <section className="card">
+        <div className="card__head">
+          <div>
+            <h3 className="card__title">Distribución por dimensión</h3>
+            <p className="card__subtitle">Comparativa por sesión · favorabilidad, neutralidad y desfavorabilidad</p>
+          </div>
+        </div>
+
+        <div className="dim-stacks">
+          {DIMS.map(dim => (
+            <div className="dim-stack-block" key={dim.id}>
+              <div className="dim-stack-block__label">{dim.label}</div>
+              {perSession.map(({ session }, idx) => {
+                const stats = computeFav(session, dim.questions)
+                return (
+                  <div className={`stack-row ${idx === safeIdx ? 'stack-row--active' : ''}`} key={session.label}>
+                    <span className="stack-row__label">{session.label}</span>
+                    <div className="stack-row__bar">
+                      {stats.unfavorable > 0 && (
+                        <div className="stack-row__seg stack-row__seg--unf" style={{ width: `${stats.unfavorable}%` }}>
+                          {stats.unfavorable >= 8 ? `${stats.unfavorable.toFixed(0)}%` : ''}
+                        </div>
+                      )}
+                      {stats.neutral > 0 && (
+                        <div className="stack-row__seg stack-row__seg--neu" style={{ width: `${stats.neutral}%` }}>
+                          {stats.neutral >= 8 ? `${stats.neutral.toFixed(0)}%` : ''}
+                        </div>
+                      )}
+                      {stats.favorable > 0 && (
+                        <div className="stack-row__seg stack-row__seg--fav" style={{ width: `${stats.favorable}%` }}>
+                          {stats.favorable >= 8 ? `${stats.favorable.toFixed(0)}%` : ''}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
             </div>
-          </div>
-          <div style={{ width: '100%', height: 300 }}>
-            <ResponsiveContainer>
-              <BarChart data={dimDistData} margin={{ top: 8, right: 16, bottom: 8, left: -20 }}>
-                <CartesianGrid stroke="var(--border)" strokeDasharray="2 4" vertical={false} />
-                <XAxis
-                  dataKey="dim"
-                  axisLine={{ stroke: 'var(--border-strong)' }}
-                  tickLine={false}
-                  tick={{ fill: 'var(--text-soft)', fontSize: 13, fontFamily: 'Poppins', fontWeight: 600 }}
-                  dy={6}
-                />
-                <YAxis
-                  domain={[0, 100]}
-                  tickFormatter={v => v + '%'}
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fill: 'var(--text-mute)', fontSize: 11, fontFamily: 'Poppins' }}
-                />
-                <Tooltip content={<DimStackTooltip />} cursor={{ fill: 'rgba(34,34,34,0.04)' }} />
-                <Bar dataKey="Desfavorable" stackId="s" fill="var(--magenta-2)" radius={0} />
-                <Bar dataKey="Neutral"      stackId="s" fill="var(--gris-2)"    radius={0} />
-                <Bar dataKey="Favorable"    stackId="s" fill="var(--turquesa)"  radius={[6, 6, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-          <div style={{ display: 'flex', gap: 16, justifyContent: 'center', marginTop: 8, flexWrap: 'wrap' }}>
-            {[['Desfavorable', 'var(--magenta-2)'], ['Neutral', 'var(--gris-2)'], ['Favorable', 'var(--turquesa)']].map(([label, color]) => (
-              <span key={label} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 11.5, color: 'var(--text-soft)' }}>
-                <span style={{ width: 10, height: 10, background: color, borderRadius: 2 }} />
-                {label}
-              </span>
-            ))}
-          </div>
-        </section>
-      </div>
+          ))}
+        </div>
+
+        <div className="stack-legend">
+          <span className="stack-legend__item"><span className="stack-legend__sw stack-legend__sw--unf" />Desfavorable (1–2)</span>
+          <span className="stack-legend__item"><span className="stack-legend__sw stack-legend__sw--neu" />Neutral (3)</span>
+          <span className="stack-legend__item"><span className="stack-legend__sw stack-legend__sw--fav" />Favorable (4–5)</span>
+        </div>
+      </section>
     </>
   )
 }
