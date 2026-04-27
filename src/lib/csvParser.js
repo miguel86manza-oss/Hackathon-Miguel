@@ -101,24 +101,30 @@ export async function fetchAndParseCsv(csvUrl, schemaType = 'pulso') {
 
   const foundCount = Object.keys(colMap).length
   // --- Detectar columna de timestamp dinámicamente ---
-  // Buscamos "marca de tiempo" o "timestamp" en la fila de headers.
-  // Si no se encuentra, probamos con las primeras columnas hasta dar con una que
-  // contenga una fecha válida en la primera fila de datos.
+  // Buscamos "marca de tiempo" en TODAS las filas hasta el encabezado
+  // (los headers de meta-columnas pueden estar en una fila distinta a la de preguntas).
   let tsCol = -1
-  for (let c = 0; c < headerRow.length; c++) {
-    const h = normalize(headerRow[c])
-    if (h.includes('marca de tiempo') || h.includes('timestamp') || h.includes('fecha')) {
-      tsCol = c
-      break
+  outer: for (let r = 0; r <= headerRowIdx; r++) {
+    for (let c = 0; c < matrix[r].length; c++) {
+      const h = normalize(matrix[r][c])
+      if (h.includes('marca de tiempo') || h.includes('timestamp') || h.includes('fecha')) {
+        tsCol = c
+        break outer
+      }
     }
   }
   if (tsCol < 0) {
-    // Buscar la primera columna de datos que contenga algo que parezca fecha
+    // Fallback: buscar en la primera fila de datos una celda que parezca fecha real
+    // (debe contener ":" o "/" o nombre de mes — descarta IDs numéricos simples)
     const firstDataRow = matrix[headerRowIdx + 1] || []
     for (let c = 0; c < Math.min(firstDataRow.length, 10); c++) {
-      if (parseTimestamp(firstDataRow[c]) !== null) { tsCol = c; break }
+      const v = String(firstDataRow[c] || '').trim()
+      if (v && (v.includes(':') || v.includes('/') || /[A-Za-z]{3}/.test(v))) {
+        if (parseTimestamp(v) !== null) { tsCol = c; break }
+      }
     }
   }
+  if (tsCol < 0) tsCol = 3  // columna D por defecto según estructura Cosude
 
   // --- Extraer filas de respuestas ---
   const rows = []
