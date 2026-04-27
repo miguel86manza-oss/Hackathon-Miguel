@@ -92,7 +92,7 @@ export async function fetchAndParseCsv(csvUrl, schemaType = 'pulso') {
     const target = normalize(q.full).replace(/[.!?,;]+$/, '').trim().slice(0, 40)
     for (let c = 0; c < headerRow.length; c++) {
       const cell = normalize(headerRow[c]).replace(/[.!?,;]+$/, '').trim()
-      if (cell.includes(target) || (target.length >= 20 && target.includes(cell.slice(0, 25)))) {
+      if (cell.includes(target) || (cell.length >= 20 && cell.includes(target.slice(0, 25)))) {
         colMap[q.id] = c
         break
       }
