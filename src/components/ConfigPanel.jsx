@@ -1,11 +1,14 @@
 import React, { useRef, useState } from 'react'
 import { toCsvUrl } from '../lib/csvParser.js'
 
-function buildConsultorUrl(urlPulso, urlAvance) {
+function buildConsultorUrl(urlPulso, urlAvance, companyName, logoUrl) {
   const base = `${window.location.origin}${window.location.pathname}`
   const p = new URLSearchParams()
-  if (urlPulso)  p.set('pulso',  urlPulso)
-  if (urlAvance) p.set('avance', urlAvance)
+  if (urlPulso)    p.set('pulso',   urlPulso)
+  if (urlAvance)   p.set('avance',  urlAvance)
+  if (companyName) p.set('company', companyName)
+  // Logo base64 no va en URL — solo URLs públicas (http/https)
+  if (logoUrl && logoUrl.startsWith('http')) p.set('logo', logoUrl)
   return `${base}?${p.toString()}`
 }
 
@@ -164,7 +167,7 @@ export default function ConfigPanel({
           </div>
 
           {(urlPulso || urlAvance) && (
-            <ShareLink url={buildConsultorUrl(urlPulso, urlAvance)} />
+            <ShareLink url={buildConsultorUrl(urlPulso, urlAvance, companyName, logoUrl)} />
           )}
         </>
       )}

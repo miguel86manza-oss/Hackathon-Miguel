@@ -28,8 +28,8 @@ export default function App() {
   // Config — los parámetros de URL tienen prioridad sobre localStorage
   const [urlPulso,  setUrlPulso]  = useState(params.get('pulso')  || saved.urlPulso  || '')
   const [urlAvance, setUrlAvance] = useState(params.get('avance') || saved.urlAvance || '')
-  const [companyName, setCompanyName] = useState(saved.companyName || '')
-  const [logoUrl, setLogoUrl] = useState(saved.logoUrl || '')
+  const [companyName, setCompanyName] = useState(params.get('company') || saved.companyName || '')
+  const [logoUrl, setLogoUrl] = useState(params.get('logo')    || saved.logoUrl    || '')
 
   // Data
   const [pulsoRows,  setPulsoRows]  = useState(MOCK_PULSO_ROWS)
