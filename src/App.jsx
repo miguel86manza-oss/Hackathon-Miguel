@@ -153,6 +153,31 @@ export default function App() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  // Vista pública: reacciona cuando el admin guarda nueva config en otra pestaña
+  const pendingConnect = useRef(false)
+  useEffect(() => {
+    if (isAdmin) return
+    const onStorage = (e) => {
+      if (e.key !== LS_KEY) return
+      const cfg = loadConfig() || {}
+      setUrlPulso(cfg.urlPulso || '')
+      setUrlAvance(cfg.urlAvance || '')
+      setCompanyName(cfg.companyName || '')
+      setLogoUrl(cfg.logoUrl || '')
+      pendingConnect.current = true
+    }
+    window.addEventListener('storage', onStorage)
+    return () => window.removeEventListener('storage', onStorage)
+  }, [isAdmin])
+
+  // Dispara la conexión una vez que el estado de URLs ya se actualizó
+  useEffect(() => {
+    if (pendingConnect.current && (urlPulso || urlAvance)) {
+      pendingConnect.current = false
+      connectRef.current?.()
+    }
+  }, [urlPulso, urlAvance])
+
   const handleReset = () => {
     setPulsoRows(MOCK_PULSO_ROWS)
     setAvanceRows(MOCK_AVANCE_ROWS)
