@@ -69,8 +69,9 @@ export default function App() {
         results.errors.push('Pulso: URL no reconocida.')
       } else {
         try {
-          const { rows } = await fetchAndParseCsv(csvUrl, 'pulso')
+          const { rows, meta } = await fetchAndParseCsv(csvUrl, 'pulso')
           results.pulso = rows
+          results.pulsoMeta = meta
         } catch (e) {
           results.errors.push(`Pulso: ${e.message}`)
         }
@@ -83,8 +84,9 @@ export default function App() {
         results.errors.push('Avance: URL no reconocida.')
       } else {
         try {
-          const { rows } = await fetchAndParseCsv(csvUrl, 'avance')
+          const { rows, meta } = await fetchAndParseCsv(csvUrl, 'avance')
           results.avance = rows
+          results.avanceMeta = meta
         } catch (e) {
           results.errors.push(`Avance: ${e.message}`)
         }
@@ -113,8 +115,18 @@ export default function App() {
     } else {
       const p = results.pulso?.length || 0
       const a = results.avance?.length || 0
-      setStatus(`Conectado. Pulso: ${p} respuestas · Avance: ${a} respuestas. Última actualización: ${timeStr}`)
-      setStatusType('ok')
+      if (p === 0 && a === 0) {
+        const pm = results.pulsoMeta
+        const am = results.avanceMeta
+        const diag = []
+        if (pm) diag.push(`Pulso → encabezado en fila ${pm.headerRowIdx}, preguntas encontradas: ${pm.questionsFound}/${pm.questionsTotal}, col. timestamp: ${pm.tsCol} (valor: "${pm.firstTsValue}")`)
+        if (am) diag.push(`Avance → encabezado en fila ${am.headerRowIdx}, objetivos encontrados: ${am.questionsFound}/${am.questionsTotal}, col. timestamp: ${am.tsCol} (valor: "${am.firstTsValue}")`)
+        setStatus('Conectado pero sin filas válidas. ' + diag.join(' | '))
+        setStatusType('error')
+      } else {
+        setStatus(`Conectado. Pulso: ${p} respuestas · Avance: ${a} respuestas. Última actualización: ${timeStr}`)
+        setStatusType('ok')
+      }
     }
 
     if (anyOk) setLastUpdated(now)

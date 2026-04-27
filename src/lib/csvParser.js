@@ -100,10 +100,6 @@ export async function fetchAndParseCsv(csvUrl, schemaType = 'pulso') {
   }
 
   const foundCount = Object.keys(colMap).length
-  if (foundCount < questions.length) {
-    console.warn(`Solo se mapearon ${foundCount} de ${questions.length} preguntas`)
-  }
-
   // --- Detectar columna de timestamp dinámicamente ---
   // Buscamos "marca de tiempo" o "timestamp" en la fila de headers.
   // Si no se encuentra, probamos con las primeras columnas hasta dar con una que
@@ -160,6 +156,9 @@ export async function fetchAndParseCsv(csvUrl, schemaType = 'pulso') {
       totalResponses: rows.length,
       questionsFound: foundCount,
       questionsTotal: questions.length,
+      headerRowIdx,
+      tsCol,
+      firstTsValue: tsCol >= 0 ? ((matrix[headerRowIdx + 1] || [])[tsCol] || '') : '',
     },
     rows,
   }
