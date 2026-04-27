@@ -1,6 +1,33 @@
 import React, { useRef, useState } from 'react'
 import { toCsvUrl } from '../lib/csvParser.js'
 
+function buildConsultorUrl(urlPulso, urlAvance) {
+  const base = `${window.location.origin}${window.location.pathname}`
+  const p = new URLSearchParams()
+  if (urlPulso)  p.set('pulso',  urlPulso)
+  if (urlAvance) p.set('avance', urlAvance)
+  return `${base}?${p.toString()}`
+}
+
+function ShareLink({ url }) {
+  const [copied, setCopied] = useState(false)
+  const copy = () => {
+    navigator.clipboard.writeText(url).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    })
+  }
+  return (
+    <div className="share-link">
+      <span className="share-link__label">Link del consultor</span>
+      <code className="share-link__url">{url}</code>
+      <button className="btn btn--ghost btn--sm" onClick={copy}>
+        {copied ? '✓ Copiado' : 'Copiar'}
+      </button>
+    </div>
+  )
+}
+
 export default function ConfigPanel({
   urlPulso, urlAvance, companyName, logoUrl,
   onChangeUrlPulso, onChangeUrlAvance, onChangeCompany, onChangeLogo,
@@ -137,14 +164,7 @@ export default function ConfigPanel({
           </div>
 
           {(urlPulso || urlAvance) && (
-            <div style={{ marginTop: 12, fontSize: 11, color: 'var(--text-mute)' }}>
-              {urlPulso && (
-                <div>URL Pulso convertida: <code style={{ fontSize: 10 }}>{toCsvUrl(urlPulso) || '— no pude convertirla, publicala como CSV —'}</code></div>
-              )}
-              {urlAvance && (
-                <div>URL Avance convertida: <code style={{ fontSize: 10 }}>{toCsvUrl(urlAvance) || '— no pude convertirla, publicala como CSV —'}</code></div>
-              )}
-            </div>
+            <ShareLink url={buildConsultorUrl(urlPulso, urlAvance)} />
           )}
         </>
       )}
