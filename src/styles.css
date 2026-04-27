@@ -30,11 +30,9 @@
   --likert-5:      var(--turquesa);    /* Muy de acuerdo */
 
   /* Avance */
-  --verde-oscuro:  #1b5e20;
-  --verde-claro:   #2e7d32;
   --avance-1:      var(--magenta-2);   /* No realizado */
-  --avance-2:      var(--verde-claro); /* En proceso */
-  --avance-3:      var(--verde-oscuro); /* Realizado */
+  --avance-2:      var(--turquesa);    /* En proceso */
+  --avance-3:      var(--turquesa-sec); /* Realizado */
 
   --font: 'Poppins', system-ui, sans-serif;
   --radius:        12px;
