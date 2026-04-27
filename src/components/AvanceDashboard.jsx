@@ -171,36 +171,6 @@ export default function AvanceDashboard({ rows, isDemo }) {
         </div>
       </section>
 
-      {/* === Estado actual por objetivo === */}
-      <section className="card">
-        <div className="card__head">
-          <div>
-            <h3 className="card__title">Estado actual por objetivo</h3>
-            <p className="card__subtitle">% de participantes por nivel de avance · comparación entre sesiones</p>
-          </div>
-        </div>
-
-        <div className="avance-table">
-          <div className="avance-table__head">
-            <span>Sesión</span>
-            <span>Objetivo</span>
-            <span>No realizado</span>
-            <span>En proceso</span>
-            <span>Realizado</span>
-          </div>
-          {visibleSessions.flatMap(({ session, dist }) =>
-            AVANCE_OBJETIVOS.map(obj => (
-              <div className="avance-table__row" key={`${session.label}-${obj.id}`}>
-                <span className="avance-table__session">{session.label}</span>
-                <span className="avance-table__label" title={obj.full}>{obj.short}</span>
-                <span className="avance-table__cell avance-table__cell--1">{dist[obj.id][1].toFixed(0)}%</span>
-                <span className="avance-table__cell avance-table__cell--2">{dist[obj.id][2].toFixed(0)}%</span>
-                <span className="avance-table__cell avance-table__cell--3">{dist[obj.id][3].toFixed(0)}%</span>
-              </div>
-            ))
-          )}
-        </div>
-      </section>
     </>
   )
 }

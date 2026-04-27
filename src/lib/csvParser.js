@@ -1,5 +1,5 @@
 import Papa from 'papaparse'
-import { PULSO_QUESTIONS, AVANCE_OBJETIVOS, META_COLS } from './schema.js'
+import { PULSO_QUESTIONS, AVANCE_OBJETIVOS } from './schema.js'
 
 /**
  * Convierte una URL normal de Google Sheets a la URL pública publicada en CSV.
@@ -104,14 +104,30 @@ export async function fetchAndParseCsv(csvUrl, schemaType = 'pulso') {
     console.warn(`Solo se mapearon ${foundCount} de ${questions.length} preguntas`)
   }
 
+  // --- Detectar columna de timestamp dinámicamente ---
+  // Buscamos "marca de tiempo" o "timestamp" en la fila de headers.
+  // Si no se encuentra, probamos con las primeras columnas hasta dar con una que
+  // contenga una fecha válida en la primera fila de datos.
+  let tsCol = -1
+  for (let c = 0; c < headerRow.length; c++) {
+    const h = normalize(headerRow[c])
+    if (h.includes('marca de tiempo') || h.includes('timestamp') || h.includes('fecha')) {
+      tsCol = c
+      break
+    }
+  }
+  if (tsCol < 0) {
+    // Buscar la primera columna de datos que contenga algo que parezca fecha
+    const firstDataRow = matrix[headerRowIdx + 1] || []
+    for (let c = 0; c < Math.min(firstDataRow.length, 10); c++) {
+      if (parseTimestamp(firstDataRow[c]) !== null) { tsCol = c; break }
+    }
+  }
+
   // --- Extraer filas de respuestas ---
-  // Las respuestas empiezan DESPUÉS de la fila de headers
-  // y contienen un timestamp en la columna 3
   const rows = []
   for (let r = headerRowIdx + 1; r < matrix.length; r++) {
     const row = matrix[r]
-    const ts = row[META_COLS.timestamp]
-    if (!ts || !ts.trim()) continue  // fila vacía
 
     const responses = {}
     let hasAnyResponse = false
@@ -126,14 +142,17 @@ export async function fetchAndParseCsv(csvUrl, schemaType = 'pulso') {
       }
     }
 
-    if (hasAnyResponse) {
-      rows.push({
-        timestamp: parseTimestamp(ts),
-        rawTimestamp: ts,
-        responseId: row[META_COLS.responseId] || '',
-        responses,
-      })
-    }
+    if (!hasAnyResponse) continue
+
+    const tsRaw = tsCol >= 0 ? (row[tsCol] || '') : ''
+    const ts = parseTimestamp(tsRaw)
+
+    rows.push({
+      timestamp: ts,
+      rawTimestamp: tsRaw,
+      responseId: row[0] || '',
+      responses,
+    })
   }
 
   return {
@@ -213,12 +232,12 @@ function parseTimestamp(ts) {
 export function groupBySessions(rows) {
   const groups = new Map()
   for (const row of rows) {
-    if (!row.timestamp) continue
-    const key = dateKey(row.timestamp)
+    const date = row.timestamp || new Date(0)  // filas sin fecha → grupo "época 0"
+    const key = row.timestamp ? dateKey(date) : '__no_date__'
     if (!groups.has(key)) {
       groups.set(key, {
         sessionKey: key,
-        date: row.timestamp,
+        date,
         rows: [],
       })
     }
