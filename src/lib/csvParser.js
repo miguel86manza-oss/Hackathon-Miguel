@@ -86,11 +86,13 @@ export async function fetchAndParseCsv(csvUrl, schemaType = 'pulso') {
   }
 
   // Mapear cada pregunta a su columna, buscando match por texto normalizado
+  // Se elimina puntuación final antes de comparar para tolerar hojas que omiten el punto
   const headerRow = matrix[headerRowIdx]
   for (const q of questions) {
-    const target = normalize(q.full).slice(0, 40)
+    const target = normalize(q.full).replace(/[.!?,;]+$/, '').trim().slice(0, 40)
     for (let c = 0; c < headerRow.length; c++) {
-      if (normalize(headerRow[c]).includes(target)) {
+      const cell = normalize(headerRow[c]).replace(/[.!?,;]+$/, '').trim()
+      if (cell.includes(target) || (target.length >= 20 && target.includes(cell.slice(0, 25)))) {
         colMap[q.id] = c
         break
       }

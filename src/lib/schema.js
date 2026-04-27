@@ -48,3 +48,12 @@ export const META_COLS = {
   ip:         2,
   timestamp:  3,   // 'Marca de tiempo (mm/dd/yyyy)'
 }
+
+// Agrupación de preguntas en dimensiones del pulso de coalición
+export const PULSO_DIMENSIONS = [
+  { id: 'A', label: 'A) Confianza interpersonal',                       questions: ['q9', 'q10'] },
+  { id: 'B', label: 'B) Alineamiento sobre el desafío',                  questions: ['q1', 'q2'] },
+  { id: 'C', label: 'C) Conocimiento del enfoque',                       questions: ['q3', 'q4'] },
+  { id: 'D', label: 'D) Claridad de roles',                              questions: ['q5', 'q6'] },
+  { id: 'E', label: 'E) Dinámica de equipo',                             questions: ['q7', 'q8'] },
+]
