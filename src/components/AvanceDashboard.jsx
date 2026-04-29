@@ -134,7 +134,8 @@ export default function AvanceDashboard({ rows, isDemo }) {
         <div className="dim-stacks">
           {AVANCE_OBJETIVOS.map(obj => (
             <div className="dim-stack-block" key={obj.id}>
-              <div className="dim-stack-block__label" title={obj.full}>{obj.short}</div>
+              <div className="dim-stack-block__label">{obj.short}</div>
+              <div className="dim-stack-block__sublabel">{obj.full}</div>
               {visibleSessions.map(({ session, dist }) => {
                 const d = dist[obj.id]
                 return (

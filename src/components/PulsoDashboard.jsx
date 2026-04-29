@@ -199,91 +199,93 @@ export default function PulsoDashboard({ rows, isDemo }) {
         </div>
       </section>
 
-      {/* === Distribución por dimensión (barras apiladas horizontales por sesión) === */}
-      <section className="card">
-        <div className="card__head">
-          <div>
-            <h3 className="card__title">Distribución por dimensión</h3>
-            <p className="card__subtitle">Comparativa por sesión · favorabilidad, neutralidad y desfavorabilidad</p>
-          </div>
-        </div>
-
-        <div className="dim-stacks">
-          {DIMS.map(dim => (
-            <div className="dim-stack-block" key={dim.id}>
-              <div className="dim-stack-block__label">{dim.label}</div>
-              {visibleSessions.map(({ session }, idx) => {
-                const stats = computeFav(session, dim.questions)
-                const origIdx = perSession.findIndex(p => p.session.label === session.label)
-                return (
-                  <div className={`stack-row ${origIdx === safeIdx && !isAll ? 'stack-row--active' : ''}`} key={session.label}>
-                    <span className="stack-row__label">{session.label}</span>
-                    <div className="stack-row__bar">
-                      {stats.unfavorable > 0 && (
-                        <div className="stack-row__seg stack-row__seg--unf" style={{ width: `${stats.unfavorable}%` }}>
-                          {stats.unfavorable >= 8 ? `${stats.unfavorable.toFixed(0)}%` : ''}
-                        </div>
-                      )}
-                      {stats.neutral > 0 && (
-                        <div className="stack-row__seg stack-row__seg--neu" style={{ width: `${stats.neutral}%` }}>
-                          {stats.neutral >= 8 ? `${stats.neutral.toFixed(0)}%` : ''}
-                        </div>
-                      )}
-                      {stats.favorable > 0 && (
-                        <div className="stack-row__seg stack-row__seg--fav" style={{ width: `${stats.favorable}%` }}>
-                          {stats.favorable >= 8 ? `${stats.favorable.toFixed(0)}%` : ''}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )
-              })}
+      {/* === Distribución por dimensión + Favorabilidad por afirmación (en paralelo) === */}
+      <div className="parallel-cards">
+        <section className="card">
+          <div className="card__head">
+            <div>
+              <h3 className="card__title">Distribución por dimensión</h3>
+              <p className="card__subtitle">Comparativa por sesión · favorabilidad, neutralidad y desfavorabilidad</p>
             </div>
-          ))}
-        </div>
-
-        <div className="stack-legend">
-          <span className="stack-legend__item"><span className="stack-legend__sw stack-legend__sw--unf" />Desfavorable (1–2)</span>
-          <span className="stack-legend__item"><span className="stack-legend__sw stack-legend__sw--neu" />Neutral (3)</span>
-          <span className="stack-legend__item"><span className="stack-legend__sw stack-legend__sw--fav" />Favorable (4–5)</span>
-        </div>
-      </section>
-
-      {/* === Favorabilidad por afirmación (comparativa) === */}
-      <section className="card">
-        <div className="card__head">
-          <div>
-            <h3 className="card__title">Favorabilidad por afirmación</h3>
-            <p className="card__subtitle">Comparativa por sesión · % de respuestas favorables (4–5)</p>
           </div>
-        </div>
-        <div className="dims">
-          {DIMS.map(dim => (
-            <React.Fragment key={dim.id}>
-              <div className="dim-group-label">{dim.label}</div>
-              {dim.questions.map(qid => {
-                const q = PULSO_QUESTIONS.find(q => q.id === qid)
-                return (
-                  <div className="comp-question" key={qid}>
-                    <div className="comp-question__title" title={q.full}>{q.short}</div>
-                    <div className="comp-question__rows">
-                      {visibleSessions.map(({ session, qFav }) => (
-                        <div className="comp-row" key={session.label}>
-                          <span className="comp-row__label">{session.label}</span>
-                          <div className="comp-row__bar">
-                            <div className="comp-row__fill" style={{ width: `${qFav[qid]}%` }} />
+
+          <div className="dim-stacks">
+            {DIMS.map(dim => (
+              <div className="dim-stack-block" key={dim.id}>
+                <div className="dim-stack-block__label">{dim.label}</div>
+                {visibleSessions.map(({ session }) => {
+                  const stats = computeFav(session, dim.questions)
+                  const origIdx = perSession.findIndex(p => p.session.label === session.label)
+                  return (
+                    <div className={`stack-row ${origIdx === safeIdx && !isAll ? 'stack-row--active' : ''}`} key={session.label}>
+                      <span className="stack-row__label">{session.label}</span>
+                      <div className="stack-row__bar">
+                        {stats.unfavorable > 0 && (
+                          <div className="stack-row__seg stack-row__seg--unf" style={{ width: `${stats.unfavorable}%` }}>
+                            {stats.unfavorable >= 8 ? `${stats.unfavorable.toFixed(0)}%` : ''}
                           </div>
-                          <span className="comp-row__value">{qFav[qid].toFixed(0)}%</span>
-                        </div>
-                      ))}
+                        )}
+                        {stats.neutral > 0 && (
+                          <div className="stack-row__seg stack-row__seg--neu" style={{ width: `${stats.neutral}%` }}>
+                            {stats.neutral >= 8 ? `${stats.neutral.toFixed(0)}%` : ''}
+                          </div>
+                        )}
+                        {stats.favorable > 0 && (
+                          <div className="stack-row__seg stack-row__seg--fav" style={{ width: `${stats.favorable}%` }}>
+                            {stats.favorable >= 8 ? `${stats.favorable.toFixed(0)}%` : ''}
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                )
-              })}
-            </React.Fragment>
-          ))}
-        </div>
-      </section>
+                  )
+                })}
+              </div>
+            ))}
+          </div>
+
+          <div className="stack-legend">
+            <span className="stack-legend__item"><span className="stack-legend__sw stack-legend__sw--unf" />Desfavorable (1–2)</span>
+            <span className="stack-legend__item"><span className="stack-legend__sw stack-legend__sw--neu" />Neutral (3)</span>
+            <span className="stack-legend__item"><span className="stack-legend__sw stack-legend__sw--fav" />Favorable (4–5)</span>
+          </div>
+        </section>
+
+        <section className="card">
+          <div className="card__head">
+            <div>
+              <h3 className="card__title">Favorabilidad por afirmación</h3>
+              <p className="card__subtitle">Comparativa por sesión · % de respuestas favorables (4–5)</p>
+            </div>
+          </div>
+          <div className="dims">
+            {DIMS.map(dim => (
+              <React.Fragment key={dim.id}>
+                <div className="dim-group-label">{dim.label}</div>
+                {dim.questions.map(qid => {
+                  const q = PULSO_QUESTIONS.find(q => q.id === qid)
+                  return (
+                    <div className="comp-question" key={qid}>
+                      <div className="comp-question__title">{q.short}</div>
+                      <div className="comp-question__subtitle">{q.full}</div>
+                      <div className="comp-question__rows">
+                        {visibleSessions.map(({ session, qFav }) => (
+                          <div className="comp-row" key={session.label}>
+                            <span className="comp-row__label">{session.label}</span>
+                            <div className="comp-row__bar">
+                              <div className="comp-row__fill" style={{ width: `${qFav[qid]}%` }} />
+                            </div>
+                            <span className="comp-row__value">{qFav[qid].toFixed(0)}%</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )
+                })}
+              </React.Fragment>
+            ))}
+          </div>
+        </section>
+      </div>
     </>
   )
 }

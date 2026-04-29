@@ -490,6 +490,14 @@ body { min-height: 100vh; }
   gap: 20px;
 }
 
+/* Grid de 2 columnas iguales para secciones en paralelo */
+.parallel-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
 /* ------ DIMENSION LIST ------ */
 .dims {
   display: flex;
@@ -625,6 +633,13 @@ body { min-height: 100vh; }
   font-size: 13px;
   font-weight: 600;
   color: var(--text);
+  margin-bottom: 2px;
+}
+.comp-question__subtitle {
+  font-size: 11px;
+  color: var(--text-mute);
+  font-style: italic;
+  line-height: 1.4;
   margin-bottom: 8px;
 }
 .comp-question__rows {
@@ -684,8 +699,16 @@ body { min-height: 100vh; }
   font-size: 12px;
   font-weight: 700;
   color: var(--text);
-  padding-bottom: 4px;
+  padding-bottom: 2px;
   border-bottom: 1px solid var(--border);
+  margin-bottom: 2px;
+}
+.dim-stack-block__sublabel {
+  font-size: 11px;
+  color: var(--text-mute);
+  font-style: italic;
+  line-height: 1.4;
+  padding-bottom: 4px;
   margin-bottom: 4px;
 }
 .stack-row {
@@ -721,8 +744,8 @@ body { min-height: 100vh; }
   transition: width 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 .stack-row__seg--unf  { background: var(--magenta-2); }
-.stack-row__seg--neu  { background: var(--gris-2);   color: var(--marengo); }
-.stack-row__seg--fav  { background: var(--turquesa); }
+.stack-row__seg--neu  { background: var(--turquesa); }
+.stack-row__seg--fav  { background: var(--turquesa-sec); }
 .stack-row__seg--av1  { background: var(--avance-1); }
 .stack-row__seg--av2  { background: var(--avance-2); }
 .stack-row__seg--av3  { background: var(--avance-3); }
@@ -753,8 +776,8 @@ body { min-height: 100vh; }
   display: inline-block;
 }
 .stack-legend__sw--unf { background: var(--magenta-2); }
-.stack-legend__sw--neu { background: var(--gris-2); }
-.stack-legend__sw--fav { background: var(--turquesa); }
+.stack-legend__sw--neu { background: var(--turquesa); }
+.stack-legend__sw--fav { background: var(--turquesa-sec); }
 .stack-legend__sw--av1 { background: var(--avance-1); }
 .stack-legend__sw--av2 { background: var(--avance-2); }
 .stack-legend__sw--av3 { background: var(--avance-3); }
@@ -908,6 +931,7 @@ body { min-height: 100vh; }
   .topbar__actions { flex-wrap: wrap; }
   .kpis { grid-template-columns: 1fr; }
   .split { grid-template-columns: 1fr; }
+  .parallel-cards { grid-template-columns: 1fr; }
   .kpi__value { font-size: 42px; }
   .tabs { width: 100%; }
   .tab { flex: 1; text-align: center; padding: 10px 8px; }
