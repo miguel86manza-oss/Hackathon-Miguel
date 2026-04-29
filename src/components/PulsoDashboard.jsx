@@ -220,9 +220,9 @@ export default function PulsoDashboard({ rows, isDemo }) {
                     <div className={`stack-row ${origIdx === safeIdx && !isAll ? 'stack-row--active' : ''}`} key={session.label}>
                       <span className="stack-row__label">{session.label}</span>
                       <div className="stack-row__bar">
-                        {stats.unfavorable > 0 && (
-                          <div className="stack-row__seg stack-row__seg--unf" style={{ width: `${stats.unfavorable}%` }}>
-                            {stats.unfavorable >= 8 ? `${stats.unfavorable.toFixed(0)}%` : ''}
+                        {stats.favorable > 0 && (
+                          <div className="stack-row__seg stack-row__seg--fav" style={{ width: `${stats.favorable}%` }}>
+                            {stats.favorable >= 8 ? `${stats.favorable.toFixed(0)}%` : ''}
                           </div>
                         )}
                         {stats.neutral > 0 && (
@@ -230,9 +230,9 @@ export default function PulsoDashboard({ rows, isDemo }) {
                             {stats.neutral >= 8 ? `${stats.neutral.toFixed(0)}%` : ''}
                           </div>
                         )}
-                        {stats.favorable > 0 && (
-                          <div className="stack-row__seg stack-row__seg--fav" style={{ width: `${stats.favorable}%` }}>
-                            {stats.favorable >= 8 ? `${stats.favorable.toFixed(0)}%` : ''}
+                        {stats.unfavorable > 0 && (
+                          <div className="stack-row__seg stack-row__seg--unf" style={{ width: `${stats.unfavorable}%` }}>
+                            {stats.unfavorable >= 8 ? `${stats.unfavorable.toFixed(0)}%` : ''}
                           </div>
                         )}
                       </div>

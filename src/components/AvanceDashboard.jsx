@@ -142,9 +142,9 @@ export default function AvanceDashboard({ rows, isDemo }) {
                   <div className="stack-row" key={session.label}>
                     <span className="stack-row__label">{session.label}</span>
                     <div className="stack-row__bar">
-                      {d[1] > 0 && (
-                        <div className="stack-row__seg stack-row__seg--av1" style={{ width: `${d[1]}%` }}>
-                          {d[1] >= 8 ? `${d[1].toFixed(0)}%` : ''}
+                      {d[3] > 0 && (
+                        <div className="stack-row__seg stack-row__seg--av3" style={{ width: `${d[3]}%` }}>
+                          {d[3] >= 8 ? `${d[3].toFixed(0)}%` : ''}
                         </div>
                       )}
                       {d[2] > 0 && (
@@ -152,9 +152,9 @@ export default function AvanceDashboard({ rows, isDemo }) {
                           {d[2] >= 8 ? `${d[2].toFixed(0)}%` : ''}
                         </div>
                       )}
-                      {d[3] > 0 && (
-                        <div className="stack-row__seg stack-row__seg--av3" style={{ width: `${d[3]}%` }}>
-                          {d[3] >= 8 ? `${d[3].toFixed(0)}%` : ''}
+                      {d[1] > 0 && (
+                        <div className="stack-row__seg stack-row__seg--av1" style={{ width: `${d[1]}%` }}>
+                          {d[1] >= 8 ? `${d[1].toFixed(0)}%` : ''}
                         </div>
                       )}
                     </div>
