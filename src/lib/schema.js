@@ -32,7 +32,7 @@ export const AVANCE_OBJETIVOS = [
   { id: 'o1', short: 'Propósito de equipo',        full: 'Propósito de equipo redactado.' },
   { id: 'o2', short: 'Gran Oportunidad',            full: 'Gran oportunidad formulada.' },
   { id: 'o3', short: 'Visión de cambio',            full: 'Visión de cambio esbozada.',        hidden: true },
-  { id: 'o4', short: 'Historia sector público',     full: 'Nuestra historia con el sector público alineada.' },
+  { id: 'o4', short: 'Historia sector privado',     full: 'Nuestra historia con el sector privado alineada.' },
   { id: 'o5', short: 'Objetivo sector público',     full: 'Lo que queremos con el sector público discutido.' },
   { id: 'o6', short: 'Obstáculos conversados',      full: 'Obstáculos que encontraremos conversados.' },
 ]
