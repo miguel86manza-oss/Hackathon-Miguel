@@ -60,14 +60,16 @@ export const MOCK_PULSO_ROWS = [
 ]
 
 // --- AVANCE DE OBJETIVOS (3 sesiones con progreso) ---
+// Sesiones 1 y 2: estructura original con o3 (Visión de cambio)
 const avanceSession1 = genSession('2026-01-15T10:00:00', 6, {
   o1: 1.3, o2: 1.2, o3: 1.1,
 }, 3, 201)
 const avanceSession2 = genSession('2026-02-20T10:00:00', 6, {
   o1: 2.2, o2: 1.8, o3: 1.7,
 }, 3, 202)
-const avanceSession3 = genSession('2026-03-25T10:00:00', 6, {
-  o1: 2.8, o2: 2.5, o3: 2.3,
+// Sesión 3: nueva estructura con o4, o5, o6 (sin o3)
+const avanceSession3 = genSession('2026-04-26T10:00:00', 6, {
+  o1: 2.8, o2: 2.5, o4: 1.5, o5: 1.3, o6: 1.2,
 }, 3, 203)
 
 export const MOCK_AVANCE_ROWS = [

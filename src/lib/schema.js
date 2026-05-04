@@ -29,9 +29,12 @@ export const LIKERT_LABELS = {
 // Escala 1-3 (1=No realizado, 2=En proceso, 3=Realizado)
 // Son 3 objetivos
 export const AVANCE_OBJETIVOS = [
-  { id: 'o1', short: 'Propósito de equipo',     full: 'Propósito de equipo redactado.' },
-  { id: 'o2', short: 'Gran Oportunidad',        full: 'Gran oportunidad formulada.' },
-  { id: 'o3', short: 'Visión de cambio',        full: 'Visión de cambio esbozada.' },
+  { id: 'o1', short: 'Propósito de equipo',        full: 'Propósito de equipo redactado.' },
+  { id: 'o2', short: 'Gran Oportunidad',            full: 'Gran oportunidad formulada.' },
+  { id: 'o3', short: 'Visión de cambio',            full: 'Visión de cambio esbozada.',        hidden: true },
+  { id: 'o4', short: 'Historia sector público',     full: 'Nuestra historia con el sector público alineada.' },
+  { id: 'o5', short: 'Objetivo sector público',     full: 'Lo que queremos con el sector público discutido.' },
+  { id: 'o6', short: 'Obstáculos conversados',      full: 'Obstáculos que encontraremos conversados.' },
 ]
 
 export const AVANCE_LABELS = {

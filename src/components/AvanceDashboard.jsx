@@ -108,8 +108,8 @@ export default function AvanceDashboard({ rows, isDemo }) {
 
         <div className="kpi">
           <div className="kpi__label">Objetivos trackeados</div>
-          <div className="kpi__value">{AVANCE_OBJETIVOS.length}</div>
-          <div className="kpi__caption">Propósito · Gran Oportunidad · Visión</div>
+          <div className="kpi__value">{AVANCE_OBJETIVOS.filter(o => !o.hidden).length}</div>
+          <div className="kpi__caption">{AVANCE_OBJETIVOS.filter(o => !o.hidden).map(o => o.short).join(' · ')}</div>
         </div>
 
         <div className="kpi">
@@ -132,7 +132,7 @@ export default function AvanceDashboard({ rows, isDemo }) {
         </div>
 
         <div className="dim-stacks">
-          {AVANCE_OBJETIVOS.map(obj => (
+          {AVANCE_OBJETIVOS.filter(o => !o.hidden).map(obj => (
             <div className="dim-stack-block" key={obj.id}>
               <div className="dim-stack-block__label">{obj.short}</div>
               <div className="dim-stack-block__sublabel">{obj.full}</div>
