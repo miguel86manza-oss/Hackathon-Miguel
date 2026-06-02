@@ -1,106 +1,73 @@
-# Adapsys · Tablero de Pulso y Avance
+# Hackathon-Miguel: Generador de Propuestas Adapsys
 
-Dashboard en **React + Vite** para visualizar los datos de los recopiladores de Adapsys (Cosude 2026 o cualquier otro cliente):
+![Adapsys](https://img.shields.io/badge/Firma-Adapsys-00b8b8?style=for-the-badge)
+![Python](https://img.shields.io/badge/Python-3.10%2B-blue?style=for-the-badge&logo=python)
+![License](https://img.shields.io/badge/Licencia-MIT-green?style=for-the-badge)
 
-- **Pulso de Coalición** — 10 afirmaciones, escala Likert 1–5.
-- **Avance de Objetivos** — 3 objetivos, escala 1–3 (No realizado / En proceso / Realizado).
+Este proyecto es un generador automatizado de propuestas de consultoría estratégica en formato PDF para la firma **Adapsys**. Utiliza plantillas HTML y estilos CSS para ensamblar documentos profesionales y consistentes con la marca, a partir de datos dinámicos.
 
-Los datos se leen directamente desde **Google Sheets publicados como CSV**, agrupados por fecha en sesiones, para mostrar el cambio entre aplicaciones del instrumento.
+## ✨ Características
 
-## Características
+- **Modularidad:** Cada sección de la propuesta (portada, contexto, diseño, etc.) es una plantilla HTML independiente.
+- **Consistencia de Marca:** Un único archivo `styles.css` centraliza toda la identidad visual de Adapsys (colores, tipografías), garantizando que todas las propuestas sean uniformes.
+- **Automatización:** Un script de Python (`orchestrator.py`) se encarga de tomar los datos del proyecto, renderizar las plantillas y fusionarlas en un único PDF final.
+- **Fácil de Extender:** Añadir nuevas secciones a la propuesta es tan simple como crear un nuevo archivo HTML en la carpeta `templates/`.
 
-- KPI con índice global consolidado + delta vs. sesión anterior.
-- Evolución temporal del índice entre sesiones.
-- Ranking por dimensión con marca de la sesión anterior (línea rosa) para ver shift.
-- Distribución de respuestas en la última sesión.
-- Comparación por objetivo a lo largo de todas las sesiones.
-- Logo y nombre de cliente personalizables (upload o URL).
-- Persistencia de configuración en `localStorage` — al recargar la página, se mantiene.
-- Modo demo con datos sintéticos para ver cómo se verá el tablero antes de conectar.
+## 🚀 Stack Tecnológico
 
-## Paleta y tipografía
+- **Python:** Lenguaje principal para la orquestación.
+- **Jinja2:** Motor de plantillas para inyectar datos en los archivos HTML.
+- **WeasyPrint:** Librería para convertir el HTML y CSS renderizado en un PDF de alta calidad.
 
-- **Turquesa claro** `#00b8b8` · **Turquesa secundario** `#006379`
-- **Gris marengo** `#222222`
-- **Magenta 1** `#ef2b97` · **Magenta 2** `#c20c5b`
-- **Grises** `#595959` · `#999999` · `#b7b7b7` · `#f3f3f3`
-- Tipografía: **Poppins** (via Google Fonts).
-
-Todas las variables están definidas en `:root` en `src/styles.css` — cambiá un color ahí y se propaga a todo el dashboard.
-
-## Correr en local
-
-```bash
-npm install
-npm run dev
-```
-
-Queda en `http://localhost:5173`.
-
-## Publicar los Google Sheets (paso CRÍTICO)
-
-El navegador NO puede leer directamente un Sheet compartido con "Cualquiera con el enlace puede ver" por restricciones de CORS. Hay que **publicarlo como CSV** (paso único por Sheet, dura 30 segundos):
-
-1. Abrí el Google Sheet.
-2. `Archivo` → `Compartir` → `Publicar en la web`.
-3. En el desplegable de **contenido**, elegí la pestaña específica del recopilador.
-4. En el desplegable de **formato**, elegí `.csv`.
-5. Click en `Publicar` → confirmar.
-6. Copiá la URL que aparece (termina en `/pub?output=csv`).
-7. Pegala en el campo correspondiente del dashboard.
-
-> También podés pegar la URL normal de edición (la que termina en `/edit#gid=...`) — el dashboard intenta convertirla, pero eso depende de que la hoja sea accesible sin auth. Si falla, publicala como CSV.
-
-## Deploy en Vercel
-
-1. Subí el proyecto a GitHub.
-2. En [vercel.com/new](https://vercel.com/new), importá el repo.
-3. Vercel detecta Vite automáticamente (el `vercel.json` ya tiene todo configurado).
-4. Click en **Deploy**.
-
-Cada push a `main` redeploya automáticamente.
-
-## Estructura del proyecto
+## 📂 Estructura del Proyecto
 
 ```
-src/
-├── components/
-│   ├── TopBar.jsx             # Header con logo + nombre cliente
-│   ├── ConfigPanel.jsx        # URLs Sheets + logo + empresa
-│   ├── PulsoDashboard.jsx     # Dashboard Pulso (Likert 1-5)
-│   └── AvanceDashboard.jsx    # Dashboard Avance (escala 1-3)
-├── lib/
-│   ├── schema.js              # Preguntas, escalas, metadatos
-│   └── csvParser.js           # Fetch, parseo y agrupación por sesiones
-├── data/
-│   └── mockData.js            # Datos demo (3 sesiones sintéticas)
-├── App.jsx                    # App principal, estado global, localStorage
-├── main.jsx
-└── styles.css                 # Variables + estilos
+Hackathon-Miguel/
+├── .gitignore
+├── README.md
+├── requirements.txt
+├── orchestrator.py         # Script principal que ejecuta la generación
+├── assets/
+│   ├── styles.css          # Estilos CSS con la marca Adapsys
+│   └── logo.png
+└── templates/
+    ├── base.html           # Plantilla base (esqueleto común)
+    ├── 01_portada.html
+    ├── 02_contexto.html
+    # ... y más plantillas
 ```
 
-## Adaptar a otro instrumento
+## 🛠️ Instalación y Uso
 
-Si los recopiladores cambian (distintas preguntas, otra escala, otros objetivos), editá `src/lib/schema.js`:
+1.  **Clonar el repositorio:**
+    ```bash
+    git clone https://github.com/tu-usuario/Hackathon-Miguel.git
+    cd Hackathon-Miguel
+    ```
 
-- `PULSO_QUESTIONS` — 10 afirmaciones del Pulso (el parser detecta las columnas por match de texto, no por índice, así que aguanta cambios de orden).
-- `AVANCE_OBJETIVOS` — 3 items de avance.
-- Si querés agregar una cuarta dimensión o un objetivo nuevo, simplemente añadí el registro al array.
+2.  **Crear y activar un entorno virtual** (recomendado):
+    ```bash
+    python -m venv venv
+    source venv/bin/activate  # En Windows: venv\Scripts\activate
+    ```
 
-## Formato esperado del CSV
+3.  **Instalar las dependencias:**
+    ```bash
+    pip install -r requirements.txt
+    ```
 
-El parser espera el formato estándar de los recopiladores de Cosude:
+4.  **Ejecutar el generador:**
+    El script `orchestrator.py` generará un archivo `propuesta.pdf` en la raíz del proyecto.
+    ```bash
+    python orchestrator.py
+    ```
 
-- Columna 0: ID de respuesta
-- Columna 3: **Marca de tiempo** (`mm/dd/yyyy` o `mm/dd/yyyy hh:mm:ss`) — fundamental, agrupa sesiones.
-- Headers con el texto completo de cada pregunta (en algún renglón cercano al inicio).
-- Respuestas: número 1-5 (Pulso) o 1-3 (Avance), puede venir con prefijo tipo `"4. De acuerdo"` — el parser extrae el número automáticamente.
+## 🎨 Personalización
 
-Si tu archivo tiene otra estructura, editá `src/lib/csvParser.js` (función `fetchAndParseCsv`).
+- **Contenido:** Modifica los archivos `.html` en la carpeta `templates/` para cambiar la estructura de las diapositivas.
+- **Estilo:** Edita `assets/styles.css` para cambiar colores, fuentes y otros aspectos visuales. Los colores corporativos de Adapsys ya están definidos como variables CSS.
+- **Datos:** En `orchestrator.py`, modifica el diccionario `proposal_data` para cambiar el contenido dinámico de la propuesta (nombre del cliente, fechas, etc.).
 
-## Limitaciones conocidas
+## 📄 Licencia
 
-- Los datos se descargan en cada conexión. Si el Sheet es enorme (>10k respuestas) puede tardar.
-- `localStorage` tiene ~5 MB — suficiente para URLs y un logo chico, no para datos.
-- La agrupación por sesiones usa el **día** del timestamp. Si aplicás dos veces el mismo día, se mezclan.
-- Los logos se almacenan como data URL en localStorage; para imágenes >500 KB usar URL pública en su lugar.
+Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más detalles.

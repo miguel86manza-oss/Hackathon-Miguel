@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Casos de Éxito</title>
+</head>
+<body>
+    <div class="slide slide-casos-exito">
+        <div class="slide-header">
+            <h1>Casos de Éxito en Retail</h1>
+            <p class="subtitle">Nuestra experiencia transformando líderes del sector.</p>
+        </div>
+
+        <div class="success-cases-grid">
+            {% for caso in casos_exito %}
+            <div class="case-card">
+                <div class="case-card__logo">
+                    <img src="{{ caso.logo_url }}" alt="Logo {{ caso.empresa }}">
+                </div>
+                <blockquote class="case-card__testimonial">"{{ caso.testimonio }}"</blockquote>
+                <cite class="case-card__cite">- {{ caso.autor }}, {{ caso.cargo }}</cite>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>

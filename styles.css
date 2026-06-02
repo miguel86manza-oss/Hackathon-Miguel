@@ -1,0 +1,188 @@
+/* assets/styles.css */
+
+/*
+  Hoja de estilos para las propuestas de Adapsys.
+  Utiliza variables CSS para mantener la consistencia de la marca.
+*/
+
+:root {
+  /* Paleta Principal Adapsys */
+  --color-turquesa: #00b8b8;
+  --color-turquesa-sec: #006379;
+  --color-marengo: #222222;
+  --color-magenta-1: #ef2b97;
+  --color-magenta-2: #c20c5b;
+
+  /* Paleta de Grises */
+  --color-gris-1: #595959;
+  --color-gris-2: #999999;
+  --color-gris-3: #b7b7b7;
+  --color-gris-4: #f3f3f3;
+  --color-white: #ffffff;
+
+  /* Tipografía */
+  --font-principal: 'Poppins', sans-serif; /* Asegúrate de importarla si la usas */
+}
+
+/* Estilos generales para cada "diapositiva" */
+body {
+  font-family: var(--font-principal);
+  color: var(--color-marengo);
+}
+/*
+  WeasyPrint necesita que la fuente esté disponible.
+  Si no está instalada en el sistema, podemos apuntar a Google Fonts.
+*/
+@font-face {
+  font-family: 'Poppins';
+  font-weight: 400;
+  src: url(https://fonts.gstatic.com/s/poppins/v20/pxiEyp8kv8JHgFVrJJfecg.woff2) format('woff2');
+}
+@font-face {
+  font-family: 'Poppins';
+  font-weight: 600;
+  src: url(https://fonts.gstatic.com/s/poppins/v20/pxiByp8kv8JHgFVrLEj6Z1xlFQ.woff2) format('woff2');
+}
+.slide {
+  width: 297mm; /* A4 landscape width */
+  height: 210mm; /* A4 landscape height */
+  padding: 20mm;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  page-break-after: always; /* Crucial para separar diapositivas en el PDF */
+  background-color: var(--color-white);
+}
+
+.slide:last-of-type {
+  page-break-after: avoid;
+}
+
+.slide-header {
+  border-bottom: 2px solid var(--color-turquesa);
+  padding-bottom: 15px;
+  margin-bottom: 30px;
+}
+
+.slide-header h1 {
+  font-size: 36px;
+  font-weight: 600;
+  color: var(--color-marengo);
+  margin: 0;
+}
+
+.slide-header .client-name, .slide-header .subtitle {
+  font-size: 18px;
+  color: var(--color-gris-1);
+  margin-top: 5px;
+}
+
+/* --- Diapositiva de Contexto --- */
+.slide-contexto .context-section {
+  margin-bottom: 30px;
+}
+
+.slide-contexto .context-section h2 {
+  font-size: 22px;
+  color: var(--color-turquesa-sec);
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.slide-contexto .context-section p {
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--color-gris-1);
+  max-width: 90ch; /* Mejora la legibilidad */
+}
+
+.challenge-boxes {
+  display: flex;
+  gap: 30px;
+  width: 100%;
+  margin-top: auto; /* Empuja las cajas hacia abajo */
+}
+
+.challenge-box {
+  flex: 1;
+  padding: 25px;
+  border-radius: 8px;
+  background-color: var(--color-gris-4);
+  border-left: 5px solid;
+}
+
+.challenge-box h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 15px;
+}
+
+.challenge-box p {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--color-gris-1);
+}
+
+.challenge-box.technical {
+  border-color: var(--color-turquesa);
+}
+.challenge-box.technical h3 {
+  color: var(--color-turquesa-sec);
+}
+
+.challenge-box.adaptive {
+  border-color: var(--color-magenta-1);
+}
+.challenge-box.adaptive h3 {
+  color: var(--color-magenta-2);
+}
+
+/* --- Diapositiva de Casos de Éxito --- */
+.success-cases-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  flex-grow: 1;
+  align-content: center;
+}
+
+.case-card {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-white);
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 25px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.case-card__logo {
+  height: 50px;
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.case-card__logo img {
+  max-height: 100%;
+  max-width: 150px;
+  object-fit: contain;
+  filter: grayscale(100%);
+  opacity: 0.7;
+}
+
+.case-card__testimonial {
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--color-marengo);
+  font-style: italic;
+  margin: 0 0 15px 0;
+  flex-grow: 1; /* Hace que la cita ocupe el espacio disponible */
+}
+
+.case-card__cite {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-gris-1);
+  font-style: normal;
+  text-align: right;
+}
