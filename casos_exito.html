@@ -1,27 +1,40 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Casos de Éxito</title>
-</head>
-<body>
-    <div class="slide slide-casos-exito">
-        <div class="slide-header">
-            <h1>Casos de Éxito en Retail</h1>
-            <p class="subtitle">Nuestra experiencia transformando líderes del sector.</p>
+<div class="slide slide-caso">
+
+    <div class="caso-left">
+        <div class="caso-tag">{{empresa}}</div>
+        <div class="caso-titulo">{{titulo_caso}}</div>
+        <div class="caso-intro">{{contexto_caso}}</div>
+        <div class="caso-separador"></div>
+        <div class="caso-cita">"{{testimonio}}"</div>
+        <div class="caso-autor">{{autor_nombre}}</div>
+        <div class="caso-cargo">{{autor_cargo}}</div>
+    </div>
+
+    <div class="caso-right">
+
+        <div>
+            <div class="caso-seccion-label">El Propósito</div>
+            <div class="caso-seccion-texto">{{proposito}}</div>
         </div>
 
-        <div class="success-cases-grid">
-            {% for caso in casos_exito %}
-            <div class="case-card">
-                <div class="case-card__logo">
-                    <img src="{{ caso.logo_url }}" alt="Logo {{ caso.empresa }}">
-                </div>
-                <blockquote class="case-card__testimonial">"{{ caso.testimonio }}"</blockquote>
-                <cite class="case-card__cite">- {{ caso.autor }}, {{ caso.cargo }}</cite>
+        <div class="caso-row">
+            <div>
+                <div class="caso-seccion-label">La Ruta</div>
+                <div class="caso-seccion-texto">{{la_ruta}}</div>
             </div>
-            {% endfor %}
+            <div>
+                <div class="caso-seccion-label">Lo Adaptativo</div>
+                <div class="caso-seccion-texto">{{lo_adaptativo}}</div>
+            </div>
         </div>
+
+        <div>
+            <div class="caso-seccion-label">El Impacto</div>
+            <div class="caso-seccion-texto">{{el_impacto}}</div>
+        </div>
+
+        <div class="page-num">{{num_pagina}}</div>
+
     </div>
-</body>
-</html>
+
+</div>
