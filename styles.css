@@ -1,13 +1,16 @@
 /* ============================================================
-   ADAPSYS PROPOSAL SYSTEM — styles.css
+   ADAPSYS PROPOSAL SYSTEM — styles.css  (v2 · alta fidelidad)
    Renderizado: WeasyPrint (Google Colab)
    Página: letter landscape = 279.4mm × 215.9mm
    ============================================================ */
 
+/* ---------- Tipografía corporativa (geométrica tipo Adapsys) ---------- */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+
 /* ---------- Configuración de página ---------- */
 @page {
     size: 279.4mm 215.9mm;   /* letter landscape exacto */
-    margin: 0;                /* slides manejan su propio padding */
+    margin: 0;
 }
 
 * {
@@ -17,25 +20,27 @@
 }
 
 body {
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: 'Poppins', 'Helvetica Neue', Helvetica, Arial, sans-serif;
     background: #ffffff;
-    color: #333333;
+    color: #3a3a3a;
+    -weasy-font-smoothing: antialiased;
 }
 
 /* ============================================================
-   PALETA DE COLORES ADAPSYS
-   --teal-bright : #00828a   (turquesa corporativo)
-   --teal-dark   : #004d5a   (turquesa oscuro)
-   --teal-mid    : #006878   (turquesa medio)
-   --teal-light  : #e6f2f3   (turquesa suave — fondos)
-   --magenta     : #d81b8c   (acento magenta)
-   --gray-card   : #f4f7f6   (fondo tarjetas)
-   --gray-page   : #f5f5f5   (fondo diapositivas contenido)
+   PALETA ADAPSYS  (valores de marca, vívidos)
+   --teal-bright : #14b8bd   acento cian-teal vívido
+   --teal        : #0a8d96   primario
+   --teal-dark   : #0d4f5a   cabeceras / texto oscuro
+   --ink         : #234e59   slate-teal (1ª palabra títulos)
+   --teal-soft   : #e8f3f4   fondos suaves
+   --magenta     : #d6006c   acento rosa
+   --card        : #f4f7f7   fondo tarjetas
+   --gray-text   : #5d5d5d
    ============================================================ */
 
 
 /* ============================================================
-   SLIDE BASE — contenedor de cada diapositiva (1 página PDF)
+   SLIDE BASE — 1 página PDF
    ============================================================ */
 .slide {
     width: 279.4mm;
@@ -43,132 +48,70 @@ body {
     overflow: hidden;
     position: relative;
     page-break-after: always;
-    /* Padding estándar para slides de contenido */
-    padding: 14mm 15mm 12mm 15mm;
-    background-color: #ffffff;
+    padding: 16mm 17mm 13mm 17mm;
+    background: #ffffff;
 }
 
-
-/* ============================================================
-   SLIDE: PORTADA CON GRADIENTE TEAL
-   Ejemplo: primera diapositiva "ADAPSYS_"
-   ============================================================ */
-.slide-cover {
-    background: linear-gradient(135deg,
-        #004d5a 0%, #006878 30%, #00828a 62%, #00a89a 100%);
-    padding: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.cover-logo {
-    color: #ffffff;
-    font-size: 64px;
-    font-weight: 700;
-    letter-spacing: 4px;
-    text-align: center;
-}
-
-.cover-tagline {
-    color: #00e8d4;
-    font-size: 22px;
-    font-weight: 300;
-    text-align: center;
-    margin-top: 16px;
-}
-
-
-/* ============================================================
-   SLIDE: SEPARADOR DE SECCIÓN (teal gradient + foto círculo)
-   Ejemplo: "Contexto_", "Sello metodológico_", "Plan de trabajo_"
-   ============================================================ */
-.slide-divider {
-    background: linear-gradient(135deg,
-        #004d5a 0%, #006878 30%, #00828a 62%, #00a89a 100%);
-    padding: 0;
-    display: flex;
-    align-items: center;
-}
-
-.divider-content {
-    padding: 0 15mm;
-    max-width: 62%;
-}
-
-.divider-title {
-    font-size: 52px;
-    font-weight: 300;
-    color: #ffffff;
-    line-height: 1.12;
-    letter-spacing: -0.5px;
-}
-
-.divider-title .cursor {
-    color: #4de0d0;
-}
-
-/* Foto circular + aro magenta (esquina superior derecha) */
-.divider-photo-container {
+/* Acento decorativo: cuarto de círculo teal tenue inferior-izquierda
+   (eco de los círculos de la marca, muy sutil) */
+.slide::before {
+    content: "";
     position: absolute;
-    top: -20mm;
-    right: -8mm;
-    width: 90mm;
-    height: 90mm;
-}
-
-.divider-photo-ring {
-    position: absolute;
-    top: 5mm;
-    right: 5mm;
-    width: 80mm;
-    height: 80mm;
-    border: 6px solid #d81b8c;
+    bottom: -55mm;
+    left: -55mm;
+    width: 110mm;
+    height: 110mm;
     border-radius: 50%;
+    background: radial-gradient(circle at center,
+        rgba(20,184,189,0.06) 0%, rgba(20,184,189,0.0) 70%);
+    z-index: 0;
 }
 
-.divider-photo {
-    position: absolute;
-    top: 12mm;
-    right: 0;
-    width: 75mm;
-    height: 75mm;
-    border-radius: 50%;
-    object-fit: cover;
-}
+.slide > * { position: relative; z-index: 1; }
 
 
 /* ============================================================
-   CONTENEDOR DE CABECERA (slides de contenido)
+   CABECERA + TÍTULOS
    ============================================================ */
 .header-container {
-    margin-bottom: 20px;
+    margin-bottom: 22px;
 }
 
-/* --- Títulos --- */
+/* Título sólido teal */
 .slide-title {
-    color: #00828a;
-    font-size: 28px;
+    color: #0a8d96;
+    font-size: 30px;
     font-weight: 700;
-    line-height: 1.2;
-    margin-bottom: 4px;
+    line-height: 1.15;
+    letter-spacing: -0.4px;
+    margin-bottom: 6px;
 }
 
-/* Títulos bicolor: primera palabra/línea oscura, segunda teal */
+/* Título bicolor (marca): 1ª parte slate-teal, .accent en cian vívido */
 .slide-title-dark {
-    color: #004d5a;
-    font-size: 28px;
+    color: #234e59;
+    font-size: 30px;
     font-weight: 700;
-    line-height: 1.2;
-    margin-bottom: 4px;
+    line-height: 1.18;
+    letter-spacing: -0.4px;
+    margin-bottom: 6px;
 }
-.slide-title-dark .accent { color: #00828a; }
+.slide-title-dark .accent { color: #14b8bd; }
 
 .slide-subtitle {
-    color: #666666;
+    color: #777777;
     font-size: 14px;
     font-weight: 400;
-    line-height: 1.4;
+    line-height: 1.45;
+}
+
+/* Línea-acento bajo la cabecera (filete corto magenta) */
+.title-rule {
+    width: 54px;
+    height: 4px;
+    background: #14b8bd;
+    border-radius: 3px;
+    margin-top: 12px;
 }
 
 
@@ -177,370 +120,254 @@ body {
    ============================================================ */
 .columns-container {
     display: flex;
-    gap: 16px;
+    gap: 22px;
     width: 100%;
-    margin-bottom: 16px;
+    margin-bottom: 22px;
     page-break-inside: avoid;
 }
 
 .card {
     flex: 1;
-    background-color: #f4f7f6;
-    padding: 16px 18px;
-    border-radius: 3px;
+    background: #f4f7f7;
+    border-radius: 8px;
+    padding: 0;
+    box-shadow: 0 6px 18px rgba(13,79,90,0.07);
+    overflow: hidden;
 }
 
-.card-tecnico    { border-top: 4px solid #004d5a; }
-.card-adaptativo { border-top: 4px solid #00828a; }
+/* Barra superior de color, ancho completo */
+.card::before {
+    content: "";
+    display: block;
+    height: 7px;
+    width: 100%;
+}
+.card-tecnico::before    { background: #0d4f5a; }
+.card-adaptativo::before { background: #14b8bd; }
+
+.card-inner { padding: 20px 22px 22px; }
 
 .card-title {
-    font-size: 16px;
+    font-size: 17px;
     font-weight: 700;
-    color: #111111;
-    margin-bottom: 9px;
+    color: #1f1f1f;
+    margin-bottom: 11px;
 }
 
 .card-text {
     font-size: 12.5px;
-    line-height: 1.65;
+    line-height: 1.7;
     text-align: justify;
-    color: #444444;
+    color: #555555;
 }
 
 /* Caja destacada — Alcance / nota final */
 .footer-box {
     width: 100%;
-    background-color: #e6f2f3;
-    padding: 12px 16px;
-    border-left: 4px solid #00828a;
-    border-radius: 2px;
+    background: #e8f3f4;
+    padding: 16px 22px;
+    border-left: 5px solid #14b8bd;
+    border-radius: 0 8px 8px 0;
 }
 
 .footer-box h3 {
-    font-size: 13.5px;
+    font-size: 14px;
     font-weight: 700;
-    color: #004d5a;
-    margin-bottom: 4px;
+    color: #0d4f5a;
+    margin-bottom: 5px;
 }
 
 .footer-box p {
     font-size: 12.5px;
-    line-height: 1.55;
-    color: #333333;
+    line-height: 1.6;
+    color: #444444;
 }
 
 
 /* ============================================================
-   LAYOUT: LISTA CON VIÑETAS DOS COLUMNAS
-   Ejemplo: "Notas previas", "¿Qué esperamos lograr?"
+   PÁRRAFO INTRODUCTORIO
    ============================================================ */
-.bullet-columns {
+.intro-text {
+    font-size: 13.5px;
+    line-height: 1.7;
+    color: #4a4a4a;
+    max-width: 70%;
+    margin-bottom: 26px;
+    font-weight: 500;
+}
+
+
+/* ============================================================
+   LAYOUT: SELLO METODOLÓGICO (3 columnas con badge gradiente)
+   ============================================================ */
+.metodo-columns {
     display: flex;
-    gap: 20mm;
-    width: 100%;
-    margin-top: 12px;
+    gap: 26px;
+    margin-top: 8px;
 }
 
-.bullet-col { flex: 1; }
-
-.bullet-item {
-    display: flex;
-    gap: 7px;
-    margin-bottom: 14px;
-    align-items: flex-start;
+.metodo-card {
+    flex: 1;
+    background: #f4f7f7;
+    border-radius: 10px;
+    padding: 24px 22px 26px;
+    box-shadow: 0 6px 18px rgba(13,79,90,0.06);
 }
 
-.bullet-dot {
-    color: #00828a;
-    font-size: 16px;
-    line-height: 1.25;
-    flex-shrink: 0;
-}
-
-.bullet-body { flex: 1; }
-
-.bullet-title-text {
-    font-size: 13px;
+/* Badge circular con gradiente de marca */
+.metodo-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #14b8bd 0%, #0a8d96 60%, #0d4f5a 100%);
+    color: #ffffff;
+    font-size: 15px;
     font-weight: 700;
-    color: #333333;
-    margin-bottom: 3px;
-    line-height: 1.3;
+    letter-spacing: 0.5px;
+    text-align: center;
+    line-height: 52px;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 10px rgba(13,79,90,0.18);
 }
 
-.bullet-desc {
+.metodo-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #0d4f5a;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #d8e6e7;
+}
+
+.metodo-text {
     font-size: 12px;
-    line-height: 1.6;
+    line-height: 1.7;
     color: #555555;
     text-align: justify;
 }
 
 
 /* ============================================================
-   LAYOUT: CASO DE ÉXITO
-   Split: columna teal (izq) + columna gris claro (der)
-   ============================================================ */
-.slide-caso {
-    padding: 0;   /* full-bleed para el gradiente izquierdo */
-    display: flex;
-}
-
-.caso-left {
-    width: 40%;
-    background: linear-gradient(160deg,
-        #004d5a 0%, #006878 45%, #00a89a 100%);
-    padding: 12mm 8mm 10mm 12mm;
-    color: #ffffff;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-}
-
-.caso-tag {
-    font-size: 9.5px;
-    font-weight: 700;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    color: #88d8d4;
-    margin-bottom: 5px;
-}
-
-.caso-titulo {
-    font-size: 25px;
-    font-weight: 700;
-    font-style: italic;
-    line-height: 1.15;
-    color: #ffffff;
-    margin-bottom: 9px;
-}
-
-.caso-intro {
-    font-size: 11px;
-    font-weight: 600;
-    line-height: 1.55;
-    color: #ffffff;
-    margin-bottom: 12px;
-}
-
-.caso-separador {
-    width: 34px;
-    height: 3px;
-    background: #d81b8c;
-    border-radius: 2px;
-    margin-bottom: 12px;
-}
-
-.caso-cita {
-    font-size: 10.5px;
-    font-style: italic;
-    line-height: 1.55;
-    color: #ddf4f2;
-}
-
-.caso-autor {
-    font-size: 9.5px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    margin-top: 9px;
-    color: #ffffff;
-}
-
-.caso-cargo {
-    font-size: 8.5px;
-    color: #88d8d4;
-    text-transform: uppercase;
-}
-
-.caso-right {
-    flex: 1;
-    background-color: #f5f5f5;
-    padding: 11mm 9mm 9mm;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    gap: 10px;
-}
-
-.caso-seccion-label {
-    font-size: 9px;
-    font-weight: 700;
-    color: #00828a;
-    letter-spacing: 1.3px;
-    text-transform: uppercase;
-    border-bottom: 1px dotted #bbbbbb;
-    padding-bottom: 3px;
-    margin-bottom: 4px;
-}
-
-.caso-seccion-texto {
-    font-size: 11px;
-    line-height: 1.55;
-    color: #444444;
-    text-align: justify;
-}
-
-.caso-row {
-    display: flex;
-    gap: 10px;
-}
-.caso-row > div { flex: 1; }
-
-
-/* ============================================================
-   LAYOUT: TABLA PLAN DE TRABAJO (Gantt simplificado)
+   LAYOUT: TABLA PLAN DE TRABAJO
    ============================================================ */
 .tabla-plan {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0;
     font-size: 11px;
-    margin-top: 10px;
+    margin-top: 14px;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 6px 18px rgba(13,79,90,0.07);
 }
 
-.tabla-plan th {
-    background-color: #004d5a;
+.tabla-plan thead th {
+    background: linear-gradient(135deg, #0d4f5a 0%, #0a8d96 100%);
     color: #ffffff;
-    padding: 7px 10px;
+    padding: 11px 14px;
     text-align: center;
-    font-weight: 700;
+    font-weight: 600;
     font-size: 10.5px;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.6px;
     text-transform: uppercase;
 }
 
-.tabla-plan th.col-foco {
-    text-align: left;
-    width: 28%;
-}
+.tabla-plan th.col-foco { text-align: left; width: 24%; }
 
 .tabla-plan td {
-    padding: 6px 10px;
-    border-bottom: 1px solid #dddddd;
-    color: #333333;
-    vertical-align: middle;
+    padding: 11px 14px;
+    border-bottom: 1px solid #e6ecec;
+    color: #4a4a4a;
+    vertical-align: top;
     font-size: 11px;
+    line-height: 1.55;
+    background: #ffffff;
 }
 
-.tabla-plan tr:nth-child(even) td {
-    background-color: #f4f7f6;
-}
+.tabla-plan tr:nth-child(even) td { background: #f4f7f7; }
+.tabla-plan tbody tr:last-child td { border-bottom: none; }
 
-.tabla-plan .barra {
-    height: 10px;
-    background-color: #00828a;
-    border-radius: 3px;
-    display: block;
-}
+.tabla-plan td strong { color: #0d4f5a; font-weight: 700; }
 
-.tabla-plan .barra-oscura {
-    background-color: #004d5a;
-}
-
-/* Encabezado de grupo (sin fondo diferenciado) */
-.tabla-plan .grupo-titulo td {
+/* Pill teal para el plazo (reemplaza la barra gantt) */
+.plazo-pill {
+    display: inline-block;
+    background: #e8f3f4;
+    color: #0a8d96;
+    border: 1px solid #b9dee0;
+    font-size: 9.5px;
     font-weight: 700;
-    color: #004d5a;
-    font-size: 10.5px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    padding-top: 10px;
-    background-color: transparent;
-    border-bottom: 2px solid #00828a;
+    letter-spacing: 0.3px;
+    padding: 4px 11px;
+    border-radius: 20px;
+    white-space: nowrap;
+}
+.plazo-pill.destacado {
+    background: #0a8d96;
+    color: #ffffff;
+    border-color: #0a8d96;
 }
 
 
 /* ============================================================
-   LAYOUT: SELLO METODOLÓGICO (3 columnas con ícono)
+   SEPARADOR DE SECCIÓN (teal gradient + título fino + aro magenta)
    ============================================================ */
-.metodo-columns {
+.slide-divider {
+    background: linear-gradient(135deg,
+        #14b8bd 0%, #0a8d96 45%, #0d4f5a 100%);
+    padding: 0;
     display: flex;
-    gap: 14px;
-    margin-top: 10px;
+    align-items: center;
 }
+.slide-divider::before { display: none; }
 
-.metodo-card {
-    flex: 1;
-    padding: 0 4px;
+.divider-content { padding: 0 17mm; max-width: 64%; }
+
+.divider-title {
+    font-size: 56px;
+    font-weight: 300;
+    color: #ffffff;
+    line-height: 1.1;
+    letter-spacing: -0.5px;
 }
+.divider-title .cursor { color: #aef0ec; font-weight: 300; }
 
-.metodo-icon {
-    font-size: 28px;
-    margin-bottom: 8px;
-    color: #00828a;
-}
-
-.metodo-title {
-    font-size: 13.5px;
-    font-weight: 700;
-    color: #004d5a;
-    margin-bottom: 7px;
-    padding-bottom: 4px;
-    border-bottom: 1px solid #cccccc;
-}
-
-.metodo-text {
-    font-size: 11.5px;
-    line-height: 1.6;
-    color: #444444;
-    text-align: justify;
+.divider-ring {
+    position: absolute;
+    top: -22mm; right: -10mm;
+    width: 92mm; height: 92mm;
+    border: 7px solid rgba(214,0,108,0.85);
+    border-radius: 50%;
+    z-index: 1;
 }
 
 
 /* ============================================================
-   NÚMERO DE PÁGINA (badge teal, esquina inferior derecha)
+   NÚMERO DE PÁGINA (badge teal)
    ============================================================ */
 .page-num {
     position: absolute;
-    bottom: 7mm;
-    right: 9mm;
-    width: 24px;
-    height: 24px;
-    background-color: #00828a;
+    bottom: 8mm; right: 11mm;
+    width: 26px; height: 26px;
+    background: #0a8d96;
     border-radius: 50%;
     color: #ffffff;
-    font-size: 9.5px;
+    font-size: 10px;
     font-weight: 700;
     display: flex;
     align-items: center;
     justify-content: center;
+    z-index: 2;
 }
 
-
-/* ============================================================
-   PÁRRAFO INTRODUCTORIO (sello metodológico, etc.)
-   ============================================================ */
-.intro-text {
-    font-size: 13px;
-    line-height: 1.65;
-    color: #444444;
-    max-width: 62%;
-    margin-bottom: 20px;
-    font-weight: 600;
-}
-
-/* ============================================================
-   ÍCONO BADGE (círculo con iniciales — sello metodológico)
-   ============================================================ */
-.metodo-icon {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    background-color: #e6f2f3;
-    border: 2px solid #00828a;
-    color: #00828a;
-    font-size: 10.5px;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    text-align: center;
-    line-height: 40px;
-    margin-bottom: 11px;
-}
 
 /* ============================================================
    UTILITARIOS
    ============================================================ */
-.teal         { color: #00828a; }
-.dark-teal    { color: #004d5a; }
-.magenta      { color: #d81b8c; }
+.teal         { color: #0a8d96; }
+.teal-bright  { color: #14b8bd; }
+.dark-teal    { color: #0d4f5a; }
+.magenta      { color: #d6006c; }
 .white        { color: #ffffff; }
-.text-justify { text-align: justify; }
 .bold         { font-weight: 700; }
+.text-justify { text-align: justify; }
