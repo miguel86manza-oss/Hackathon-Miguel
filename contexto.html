@@ -1,31 +1,26 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Contexto y Desafío</title>
-</head>
-<body>
-    <div class="slide slide-contexto">
-        <div class="slide-header">
-            <h1>Contexto y Desafío</h1>
-            <p class="client-name">{{ client_name }}</p>
+<div class="slide">
+    <div class="header-container">
+        <h1 class="slide-title">Contexto y Desafío</h1>
+        <h2 class="slide-subtitle">Momento Actual y Pedido del Cliente</h2>
+    </div>
+
+    <div class="columns-container">
+        <!-- Columna 1: Técnico -->
+        <div class="card card-tecnico">
+            <h3 class="card-title">Desafío Técnico</h3>
+            <p class="card-text">{{desafio_tecnico}}</p>
         </div>
 
-        <div class="context-section">
-            <h2>Momento Actual y Pedido del Cliente</h2>
-            <p>{{ contexto }}</p>
-        </div>
-
-        <div class="challenge-boxes">
-            <div class="challenge-box technical">
-                <h3>Desafío Técnico</h3>
-                <p>{{ desafio_tecnico }}</p>
-            </div>
-            <div class="challenge-box adaptive">
-                <h3>Desafío Adaptativo</h3>
-                <p>{{ desafio_adaptativo }}</p>
-            </div>
+        <!-- Columna 2: Adaptativo -->
+        <div class="card card-adaptativo">
+            <h3 class="card-title">Desafío Adaptativo</h3>
+            <p class="card-text">{{desafio_adaptativo}}</p>
         </div>
     </div>
-</body>
-</html>
+
+    <!-- Cierre inferior: Alcance -->
+    <div class="footer-box">
+        <h3>Alcance Preliminar</h3>
+        <p>{{alcance}}</p>
+    </div>
+</div>
