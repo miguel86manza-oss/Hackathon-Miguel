@@ -6,7 +6,7 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Roboto+Slab:wght@400;600&display=swap');
 
-/* ---------- Paleta de marca Adapsys (manual de marca) ---------- */
+/* ---------- Paleta de marca Adapsys (manual de marca · v4 exacta) ---------- */
 :root {
     --teal-dark:   #006379;   /* teal oscuro: títulos sólidos / fondos      */
     --teal-deep:   #044653;   /* teal profundo (1ª palabra título, gradiente)*/
@@ -15,14 +15,15 @@
     --mint:        #0BCDCD;   /* teal menta: highlights de palabras clave   */
     --pastel:      #B6E6E6;   /* teal pastel: fondo de cajas secundarias    */
     --cyan-soft:   #aef0ec;   /* cian claro (cursor en dividers)            */
-    --magenta:     #C20C5B;   /* énfasis principal de marca                 */
+    --magenta:     #C20C5B;   /* magenta fuerte: énfasis principal de marca */
     --pink:        #EF2B97;   /* rosa brillante: anillos decorativos        */
     --dark:        #1A1A1A;   /* fondo oscuro                               */
-    --offwhite:    #F4F4F4;   /* fondo claro de láminas de contenido        */
+    --offwhite:    #F3F3F3;   /* fondo claro de láminas (valor exacto marca)*/
     --card:        #ffffff;   /* tarjetas                                   */
     --soft:        #E6F4F4;   /* fondos suaves teal                         */
     --line:        #DCE7E7;   /* divisores                                  */
-    --gray:        #5D5D5D;   /* texto secundario                           */
+    --gray:        #595959;   /* texto secundario (gris oscuro marca exacto)*/
+    --gray-mid:    #9E9E9E;   /* texto terciario / placeholders             */
     --ink:         #3a3a3a;   /* texto cuerpo                               */
     /* alias retro-compatibles */
     --teal:        #006379;
@@ -105,7 +106,7 @@ body {
    PORTADA  (cover)
    ============================================================ */
 .slide-cover {
-    background: linear-gradient(135deg, var(--teal-dark) 0%, var(--teal-med) 55%, #00aab2 100%);
+    background: linear-gradient(135deg, var(--teal-dark) 0%, var(--teal-med) 55%, var(--mint) 100%);
     padding: 0;
     display: flex;
     align-items: center;
@@ -134,7 +135,7 @@ body {
 .slide-cover2 { padding: 0; display: flex; }
 .cover2-photo {
     width: 38%;
-    background: linear-gradient(160deg, #2a3b40, #0d4f5a);
+    background: linear-gradient(160deg, var(--teal-deep), var(--teal-dark));
     position: relative;
 }
 .cover2-panel {
@@ -170,7 +171,7 @@ body {
    SEPARADOR DE SECCIÓN  (divider)  — gradiente + cursor "_"
    ============================================================ */
 .slide-divider {
-    background: linear-gradient(125deg, var(--cyan) 0%, var(--teal-med) 50%, var(--teal-dark) 100%);
+    background: linear-gradient(135deg, var(--teal-dark) 0%, var(--teal-med) 50%, var(--cyan) 100%);
     padding: 0 70px;
     display: flex;
     align-items: center;
