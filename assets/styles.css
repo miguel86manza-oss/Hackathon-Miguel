@@ -1,0 +1,378 @@
+/* ============================================================
+   ADAPSYS · PROPOSAL SYSTEM — styles.css  (v3 · alta fidelidad)
+   Render: WeasyPrint  ·  Página: widescreen 16:10 (como el deck)
+   338.667mm × 211.667mm  (proporción 1920×1200)
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Roboto+Slab:wght@400;600&display=swap');
+
+/* ---------- Paleta de marca Adapsys (manual de marca) ---------- */
+:root {
+    --teal-dark:   #006379;   /* teal oscuro: títulos sólidos / fondos      */
+    --teal-deep:   #044653;   /* teal profundo (1ª palabra título, gradiente)*/
+    --teal-med:    #0097A7;   /* teal medio: transiciones / gradientes      */
+    --cyan:        #00B8B8;   /* teal claro: acentos, círculos, contornos   */
+    --mint:        #0BCDCD;   /* teal menta: highlights de palabras clave   */
+    --pastel:      #B6E6E6;   /* teal pastel: fondo de cajas secundarias    */
+    --cyan-soft:   #aef0ec;   /* cian claro (cursor en dividers)            */
+    --magenta:     #C20C5B;   /* énfasis principal de marca                 */
+    --pink:        #EF2B97;   /* rosa brillante: anillos decorativos        */
+    --dark:        #1A1A1A;   /* fondo oscuro                               */
+    --offwhite:    #F4F4F4;   /* fondo claro de láminas de contenido        */
+    --card:        #ffffff;   /* tarjetas                                   */
+    --soft:        #E6F4F4;   /* fondos suaves teal                         */
+    --line:        #DCE7E7;   /* divisores                                  */
+    --gray:        #5D5D5D;   /* texto secundario                           */
+    --ink:         #3a3a3a;   /* texto cuerpo                               */
+    /* alias retro-compatibles */
+    --teal:        #006379;
+    --teal-ink:    #044653;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+@page {
+    size: 338.667mm 211.667mm;   /* 16:10 estricto (como el deck) */
+    margin: 0;
+}
+
+body {
+    font-family: 'Poppins', 'Helvetica Neue', Arial, sans-serif;
+    background: #fff;
+    color: var(--ink);
+}
+
+/* ============================================================
+   SLIDE BASE — 1 lámina = 1 página PDF
+   ============================================================ */
+.slide {
+    width: 338.667mm;
+    height: 211.667mm;
+    position: relative;
+    overflow: hidden;
+    page-break-after: always;
+    background: var(--offwhite);
+    padding: 17mm 20mm 14mm 20mm;
+}
+.slide:last-child { page-break-after: auto; }
+.slide > * { position: relative; z-index: 2; }
+
+/* ---------- Motivos de marca reutilizables ---------- */
+
+/* Grilla de puntos (7 × 4) — esquina superior izquierda */
+.dotgrid {
+    position: absolute;
+    top: 13mm; left: 14mm;
+    width: 60mm; height: 32mm;
+    background-size: 9mm 9mm;
+    opacity: 0.85;
+    z-index: 1;
+}
+.dotgrid.teal  { background-image: radial-gradient(circle, #00B8B8 2.1px, transparent 2.2px); }
+.dotgrid.white { background-image: radial-gradient(circle, rgba(255,255,255,0.55) 2.1px, transparent 2.2px); }
+
+/* Aro rosado (eco de los círculos de marca) */
+.ring {
+    position: absolute;
+    border-radius: 50%;
+    border: 8px solid var(--pink);
+    z-index: 1;
+}
+.ring.tr { top: -34mm; right: -22mm; width: 120mm; height: 120mm; }
+.ring.bl { bottom: -44mm; left: -30mm; width: 130mm; height: 130mm; }
+
+/* Wordmark ΛDΛPSYS (usa Λ como en la marca real) */
+.wordmark {
+    font-weight: 300;
+    line-height: 0.92;
+    letter-spacing: 4px;
+    text-align: center;
+    white-space: nowrap;
+}
+.wordmark .l1, .wordmark .l2 { display: block; }
+.wordmark.white { color: #fff; }
+.wordmark.teal  { color: var(--teal); }
+
+/* Wordmark de cortesía en la esquina sup-der de láminas de contenido */
+.brand-corner {
+    position: absolute;
+    top: 14mm; right: 18mm;
+    font-size: 13px;
+    z-index: 3;
+}
+
+/* ============================================================
+   PORTADA  (cover)
+   ============================================================ */
+.slide-cover {
+    background: linear-gradient(135deg, var(--teal-dark) 0%, var(--teal-med) 55%, #00aab2 100%);
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.slide-cover .ring.bl { border-color: var(--pink); opacity: 0.9; }
+
+.cover-center { text-align: center; z-index: 2; }
+.cover-center .wordmark {
+    font-size: 86px;
+    letter-spacing: 14px;
+    margin-bottom: 26px;
+}
+.cover-tag {
+    color: #fff;
+    font-size: 26px;
+    font-weight: 400;
+    line-height: 1.35;
+    max-width: 620px;
+    margin: 0 auto;
+}
+.cover-tag b { font-weight: 700; }
+.cover-tag .accent { color: var(--cyan); font-weight: 700; }
+
+/* Portada 2 — "Propuesta + Título" con panel partido */
+.slide-cover2 { padding: 0; display: flex; }
+.cover2-photo {
+    width: 38%;
+    background: linear-gradient(160deg, #2a3b40, #0d4f5a);
+    position: relative;
+}
+.cover2-panel {
+    width: 62%;
+    background: linear-gradient(120deg, var(--teal-dark) 0%, var(--teal-med) 100%);
+    padding: 0 60px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    color: #fff;
+}
+.cover2-kicker { font-size: 22px; font-weight: 700; margin-bottom: 10px; }
+.cover2-title {
+    font-size: 58px;
+    font-weight: 800;
+    line-height: 1.04;
+    text-transform: uppercase;
+    letter-spacing: -0.5px;
+}
+.cover2-meta { margin-top: 40px; font-size: 16px; letter-spacing: 3px; opacity: 0.9; }
+.cover2-logo {
+    position: absolute;
+    bottom: 34px; left: 40px;
+    width: 96px; height: 96px;
+    border-radius: 50%;
+    background: #fff;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--gray); font-size: 13px; text-align: center; line-height: 1.2;
+    z-index: 3;
+}
+
+/* ============================================================
+   SEPARADOR DE SECCIÓN  (divider)  — gradiente + cursor "_"
+   ============================================================ */
+.slide-divider {
+    background: linear-gradient(125deg, var(--cyan) 0%, var(--teal-med) 50%, var(--teal-dark) 100%);
+    padding: 0 70px;
+    display: flex;
+    align-items: center;
+}
+.divider-title {
+    font-size: 76px;
+    font-weight: 300;
+    color: #fff;
+    line-height: 1.06;
+    letter-spacing: -1px;
+    max-width: 70%;
+}
+.divider-title .cursor { color: var(--cyan-soft); font-weight: 300; }
+.slide-divider .ring.tr { border-color: var(--pink); }
+/* "ventana" circular sobre el aro, simulando la foto del deck */
+.divider-photo {
+    position: absolute;
+    top: -20mm; right: -8mm;
+    width: 96mm; height: 96mm;
+    border-radius: 50%;
+    background: linear-gradient(150deg, rgba(255,255,255,0.16), rgba(0,0,0,0.18));
+    z-index: 1;
+}
+
+/* ============================================================
+   CABECERA DE CONTENIDO + TÍTULOS
+   ============================================================ */
+.header-container { margin-bottom: 26px; max-width: 86%; }
+
+.slide-title {           /* título sólido teal */
+    color: var(--teal);
+    font-size: 34px;
+    font-weight: 700;
+    line-height: 1.12;
+    letter-spacing: -0.5px;
+    margin-bottom: 6px;
+}
+.slide-title-dark {      /* bicolor: slate-teal + .accent cian */
+    color: var(--teal-ink);
+    font-size: 34px;
+    font-weight: 700;
+    line-height: 1.14;
+    letter-spacing: -0.5px;
+    margin-bottom: 6px;
+}
+.slide-title-dark .accent { color: var(--cyan); }
+
+.slide-subtitle { color: #7a7a7a; font-size: 15px; font-weight: 400; line-height: 1.45; }
+
+.title-rule {
+    width: 58px; height: 4px;
+    background: var(--cyan);
+    border-radius: 3px;
+    margin-top: 13px;
+}
+
+/* ============================================================
+   CONTEXTO — dos tarjetas + caja de alcance
+   ============================================================ */
+.columns-container { display: flex; gap: 26px; width: 100%; margin-bottom: 24px; }
+
+.card {
+    flex: 1;
+    background: var(--card);
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 8px 22px rgba(13,79,90,0.08);
+}
+.card::before { content: ""; display: block; height: 8px; width: 100%; }
+.card-tecnico::before    { background: var(--teal-deep); }
+.card-adaptativo::before { background: var(--cyan); }
+.card-inner { padding: 24px 26px 26px; }
+.card-title { font-size: 19px; font-weight: 700; color: #1f1f1f; margin-bottom: 12px; }
+.card-text  { font-size: 14px; line-height: 1.72; text-align: justify; color: #555; }
+
+.footer-box {
+    width: 100%;
+    background: var(--soft);
+    padding: 18px 26px;
+    border-left: 6px solid var(--cyan);
+    border-radius: 0 10px 10px 0;
+}
+.footer-box h3 { font-size: 15px; font-weight: 700; color: var(--teal-deep); margin-bottom: 5px; }
+.footer-box p  { font-size: 14px; line-height: 1.6; color: #444; }
+
+/* ============================================================
+   SELLO METODOLÓGICO — 3 columnas con badge gradiente
+   ============================================================ */
+.intro-text { font-size: 15px; line-height: 1.7; color: #4a4a4a; max-width: 72%; margin-bottom: 30px; font-weight: 500; }
+
+.metodo-columns { display: flex; gap: 30px; margin-top: 8px; }
+.metodo-card {
+    flex: 1;
+    background: var(--card);
+    border-radius: 12px;
+    padding: 28px 26px 30px;
+    box-shadow: 0 8px 22px rgba(13,79,90,0.07);
+}
+.metodo-icon {
+    width: 58px; height: 58px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--cyan) 0%, var(--teal-med) 55%, var(--teal-dark) 100%);
+    color: #fff; font-size: 17px; font-weight: 700; letter-spacing: 0.5px;
+    text-align: center; line-height: 58px; margin-bottom: 18px;
+    box-shadow: 0 5px 12px rgba(13,79,90,0.2);
+}
+.metodo-title {
+    font-size: 17px; font-weight: 700; color: var(--teal-deep);
+    margin-bottom: 11px; padding-bottom: 9px; border-bottom: 2px solid var(--line);
+}
+.metodo-text { font-size: 13.5px; line-height: 1.72; color: #555; text-align: justify; }
+
+/* ============================================================
+   PLAN DE TRABAJO — tabla
+   ============================================================ */
+.tabla-plan {
+    width: 100%; border-collapse: separate; border-spacing: 0;
+    font-size: 12.5px; margin-top: 16px; border-radius: 10px;
+    overflow: hidden; box-shadow: 0 8px 22px rgba(13,79,90,0.08);
+}
+.tabla-plan thead th {
+    background: linear-gradient(120deg, var(--teal-dark) 0%, var(--teal-med) 100%);
+    color: #fff; padding: 13px 16px; text-align: center;
+    font-weight: 600; font-size: 11.5px; letter-spacing: 0.7px; text-transform: uppercase;
+}
+.tabla-plan th.col-foco { text-align: left; width: 22%; }
+.tabla-plan td {
+    padding: 13px 16px; border-bottom: 1px solid #e6ecec; color: #4a4a4a;
+    vertical-align: top; font-size: 12.5px; line-height: 1.55; background: #fff;
+}
+.tabla-plan tr:nth-child(even) td { background: var(--offwhite); }
+.tabla-plan tbody tr:last-child td { border-bottom: none; }
+.tabla-plan td strong { color: var(--teal-deep); font-weight: 700; }
+
+.plazo-pill {
+    display: inline-block; background: var(--soft); color: var(--teal);
+    border: 1px solid #b9dee0; font-size: 10.5px; font-weight: 700;
+    letter-spacing: 0.3px; padding: 5px 13px; border-radius: 20px; white-space: nowrap;
+}
+.plazo-pill.destacado { background: var(--teal); color: #fff; border-color: var(--teal); }
+
+/* ============================================================
+   CASOS DE ÉXITO — panel coloreado izq. + secciones con íconos der.
+   ============================================================ */
+.slide-caso { padding: 0; display: flex; background: var(--offwhite); }
+
+.caso-left {
+    width: 40%;
+    background: linear-gradient(150deg, var(--teal-dark) 0%, var(--teal-med) 100%);
+    color: #fff; padding: 46px 42px; position: relative;
+    display: flex; flex-direction: column;
+}
+.caso-flag {
+    display: inline-block; background: var(--magenta); color: #fff;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.5px;
+    padding: 4px 14px; border-radius: 20px; margin-bottom: 26px; align-self: flex-start;
+}
+.caso-tag    { font-size: 15px; letter-spacing: 1px; opacity: 0.92; margin-bottom: 4px; }
+.caso-titulo { font-size: 40px; font-weight: 800; font-style: italic; line-height: 1.05; margin-bottom: 18px; }
+.caso-intro  { font-size: 13px; line-height: 1.65; opacity: 0.95; }
+.caso-separador { width: 46px; height: 4px; background: var(--magenta); margin: 22px 0; border-radius: 3px; }
+.caso-cita   { font-size: 13px; font-style: italic; line-height: 1.6; opacity: 0.96; }
+.caso-autor  { font-size: 13px; font-weight: 700; margin-top: 14px; }
+.caso-cargo  { font-size: 12px; opacity: 0.85; }
+
+.caso-right { width: 60%; padding: 46px 50px; display: flex; flex-direction: column; gap: 22px; position: relative; }
+.caso-seccion { }
+.caso-seccion-label {
+    font-size: 13px; font-weight: 700; letter-spacing: 1px;
+    color: var(--teal-deep); text-transform: uppercase; margin-bottom: 7px;
+    padding-left: 30px; position: relative; min-height: 22px; display: flex; align-items: center;
+}
+.caso-seccion-label::before {
+    content: ""; position: absolute; left: 0; top: 50%; transform: translateY(-50%);
+    width: 20px; height: 20px; background: var(--cyan);
+    -webkit-mask-size: contain; mask-size: contain;
+    -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+}
+.caso-seccion-texto { font-size: 13px; line-height: 1.62; color: #555; }
+.caso-row { display: flex; gap: 34px; }
+.caso-row > div { flex: 1; }
+.caso-impacto-list { font-size: 12.5px; line-height: 1.5; color: #555; padding-left: 16px; }
+.caso-impacto-list li { margin-bottom: 5px; }
+
+/* íconos simples (puntos teñidos) para los labels de caso */
+.ic-proposito::before  { background: var(--cyan); border-radius: 50%; }
+.ic-ruta::before       { background: var(--cyan); border-radius: 4px; }
+.ic-adaptativo::before { background: var(--cyan); border-radius: 50% 50% 50% 0; }
+.ic-impacto::before    { background: var(--magenta); border-radius: 3px; }
+
+/* ============================================================
+   NÚMERO DE PÁGINA (badge teal)
+   ============================================================ */
+.page-num {
+    position: absolute; bottom: 10mm; right: 14mm;
+    width: 30px; height: 30px; background: var(--teal);
+    border-radius: 50%; color: #fff; font-size: 11px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center; z-index: 3;
+}
+.slide-divider .page-num,
+.slide-caso .page-num { background: #fff; color: var(--teal); }
+
+/* ---------- utilitarios ---------- */
+.teal { color: var(--teal); } .cyan { color: var(--cyan); }
+.pink { color: var(--pink); } .white { color: #fff; } .bold { font-weight: 700; }

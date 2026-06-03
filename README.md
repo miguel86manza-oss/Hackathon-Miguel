@@ -1,73 +1,79 @@
-# Hackathon-Miguel: Generador de Propuestas Adapsys
+# Adapsys · Generador de Propuestas + Tablero de Indicadores
 
-![Adapsys](https://img.shields.io/badge/Firma-Adapsys-00b8b8?style=for-the-badge)
-![Python](https://img.shields.io/badge/Python-3.10%2B-blue?style=for-the-badge&logo=python)
-![License](https://img.shields.io/badge/Licencia-MIT-green?style=for-the-badge)
+Repositorio con **dos entregables independientes**:
 
-Este proyecto es un generador automatizado de propuestas de consultoría estratégica en formato PDF para la firma **Adapsys**. Utiliza plantillas HTML y estilos CSS para ensamblar documentos profesionales y consistentes con la marca, a partir de datos dinámicos.
+1. **Generador de propuestas (PDF)** — pipeline Python que arma una propuesta
+   de consultoría fiel a la identidad visual de Adapsys (portada, separadores
+   de sección, contexto, sello metodológico, plan de trabajo y casos de éxito).
+2. **Tablero de indicadores (web)** — app React/Vite que replica el dashboard
+   de la lámina "Ejemplo tablero de indicadores" (Pulso de Coalición y Avance
+   de Objetivos), leyendo datos desde Google Sheets.
 
-## ✨ Características
+---
 
-- **Modularidad:** Cada sección de la propuesta (portada, contexto, diseño, etc.) es una plantilla HTML independiente.
-- **Consistencia de Marca:** Un único archivo `styles.css` centraliza toda la identidad visual de Adapsys (colores, tipografías), garantizando que todas las propuestas sean uniformes.
-- **Automatización:** Un script de Python (`orchestrator.py`) se encarga de tomar los datos del proyecto, renderizar las plantillas y fusionarlas en un único PDF final.
-- **Fácil de Extender:** Añadir nuevas secciones a la propuesta es tan simple como crear un nuevo archivo HTML en la carpeta `templates/`.
+## 1) Generador de propuestas
 
-## 🚀 Stack Tecnológico
-
-- **Python:** Lenguaje principal para la orquestación.
-- **Jinja2:** Motor de plantillas para inyectar datos en los archivos HTML.
-- **WeasyPrint:** Librería para convertir el HTML y CSS renderizado en un PDF de alta calidad.
-
-## 📂 Estructura del Proyecto
-
+### Flujo
 ```
-Hackathon-Miguel/
-├── .gitignore
-├── README.md
-├── requirements.txt
-├── orchestrator.py         # Script principal que ejecuta la generación
-├── assets/
-│   ├── styles.css          # Estilos CSS con la marca Adapsys
-│   └── logo.png
-└── templates/
-    ├── base.html           # Plantilla base (esqueleto común)
-    ├── 01_portada.html
-    ├── 02_contexto.html
-    # ... y más plantillas
+minuta (notas/correo)
+   --> prompt "Estructurador de Propuestas Adapsys"  -->  propuesta.json
+                                                            --> orchestrator.py
+                                                                  --> propuesta_generada.pdf
+```
+El JSON usa exactamente el esquema del prompt (`cliente`, `desafio_tecnico`,
+`desafio_adaptativo`, `alcance`, `intro_metodologia`, `metodo1..3`,
+`modulo1..5`) y se le agrega un bloque `casos` (lista) y metadatos de portada
+(`titulo_propuesta`, `fecha`, `subtitulo_plan`).
+
+### Estructura
+```
+orchestrator.py        # arma la secuencia de laminas, numera paginas y exporta el PDF
+example_propuesta.json # datos de ejemplo (Casaideas) - copia el formato
+assets/
+  styles.css           # identidad de marca Adapsys (paleta, tipografia, motivos)
+templates/
+  00_portada.html      # portada + lamina "Propuesta + titulo"
+  _divider.html        # separador de seccion (gradiente teal + cursor "_")
+  contexto.html
+  sello_metodologico.html
+  plan_trabajo.html
+  caso.html            # se renderiza una lamina por cada caso de exito
 ```
 
-## 🛠️ Instalación y Uso
+### Identidad visual (alineada al deck)
+- Pagina **widescreen 16:9** (338.667 x 190.5 mm), como las laminas reales.
+- Paleta exacta: teal #006278, cian #00B8B8, rosa #C20C5B, off-white #F4F4F4.
+- Tipografia **Poppins**.
+- Motivos de marca: wordmark **ADAPSYS** (con A=Lambda), grilla de puntos,
+  aros rosados y el cursor "_" de los titulos de seccion.
 
-1.  **Clonar el repositorio:**
-    ```bash
-    git clone https://github.com/tu-usuario/Hackathon-Miguel.git
-    cd Hackathon-Miguel
-    ```
+### Uso
+```bash
+pip install -r requirements.txt
+python orchestrator.py                          # usa los datos de ejemplo
+python orchestrator.py example_propuesta.json   # carga una propuesta desde JSON
+```
+Genera `propuesta_generada.pdf` en la raiz. (En Google Colab, WeasyPrint corre
+sin configuracion extra.)
 
-2.  **Crear y activar un entorno virtual** (recomendado):
-    ```bash
-    python -m venv venv
-    source venv/bin/activate  # En Windows: venv\Scripts\activate
-    ```
+### Personalizacion
+- **Contenido:** edita el JSON o `DEFAULT_DATA` en `orchestrator.py`.
+- **Secciones:** agrega/quita pasos en `build_sequence()`.
+- **Estilo:** ajusta los tokens de color en `:root` dentro de `assets/styles.css`.
+- **Casos de exito:** suma objetos al arreglo `casos` (uno = una lamina).
 
-3.  **Instalar las dependencias:**
-    ```bash
-    pip install -r requirements.txt
-    ```
+---
 
-4.  **Ejecutar el generador:**
-    El script `orchestrator.py` generará un archivo `propuesta.pdf` en la raíz del proyecto.
-    ```bash
-    python orchestrator.py
-    ```
+## 2) Tablero de indicadores (React)
 
-## 🎨 Personalización
+App Vite separada del generador de PDF.
+```bash
+npm install
+npm run dev
+```
+Ver `src/` (componentes de Pulso de Coalicion y Avance de Objetivos).
 
-- **Contenido:** Modifica los archivos `.html` en la carpeta `templates/` para cambiar la estructura de las diapositivas.
-- **Estilo:** Edita `assets/styles.css` para cambiar colores, fuentes y otros aspectos visuales. Los colores corporativos de Adapsys ya están definidos como variables CSS.
-- **Datos:** En `orchestrator.py`, modifica el diccionario `proposal_data` para cambiar el contenido dinámico de la propuesta (nombre del cliente, fechas, etc.).
+---
 
-## 📄 Licencia
-
-Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más detalles.
+## Licencia
+MIT.
